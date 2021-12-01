@@ -28,7 +28,7 @@ class Program
     static void Main(string[] args)
     {
         string brainfuck = "";
-        string input;
+        string input = "";
         /*
         // ASCII cheat sheet
         Thread.Sleep(2000);
@@ -41,7 +41,7 @@ class Program
         if (args.Length > 0) brainfuck = File.ReadAllText(args[0]);
         else
         {
-            while ((input = Console.ReadLine()) != "START")
+            while ((input = Console.ReadLine()) != "START" && input != "DEBUG")
             {
                 brainfuck += input;
             }
@@ -96,10 +96,16 @@ class Program
                     break;
 
             }
-            Console.SetCursorPosition(0, 1);
-            Console.WriteLine(new String(' ', programPosition) + "^" + new String(' ', brainfuck.Length));
-            Display();
-            Thread.Sleep(1000);
+            if(args.Length >= 2 && args[1] == "debug" || input == "DEBUG")
+            {
+                Console.SetCursorPosition(0, 1);
+                Console.WriteLine(new String(' ', programPosition) + "^" + new String(' ', brainfuck.Length));
+                Display();
+                Thread.Sleep(500);
+            }
+            
+            
+            
             
             programPosition++;
         }
