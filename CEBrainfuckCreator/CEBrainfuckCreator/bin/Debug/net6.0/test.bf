@@ -3,10 +3,6 @@
 
 ;;;; stn value address                sets value into address (number)
 
-;;;; mv address                       moves pointer to address
-
-;;;; out                              outputs current position
-
 ;;;; oua address                      outputs at address
 
 ;;;; cpy addressA addressB            copies addressA to addressB
@@ -16,10 +12,6 @@
 ;;;; add addressA addressB addressC   adds addressA and addressB and stores in addressC
 
 ;;;; sub addressA addressB addressC   subtracts addressA from addressB and stores in addressC
-
-;;;; => mv address
-
-;;;;    out
 
 ;;
 
@@ -31,11 +23,7 @@
 
 ;;stn 5 0
 +++++
-;;stn 8 2
->>++++++++
-;;sub 0 2 3
-#
-<<<<<<<[-]>>>>>[-<<<<<+>>>>>]<<<<<[->>>>>+<<<<<<<<<<+>>>>>]
-#
-
-[-]>>>>>>>[-<<<<<<<+>>>>>>>]<<<<<<<[->>>>>>>+<<<<<<<<<<<+>>>>]<<<<<[->-<]>>>>>[-]<<<<[->>>>+<<<<]>>>>[-<<<<+>>>>>>>>>>>>+<<<<<<<<]<<<<<[-]>[-]
+;;stn 7 1
+>+++++++
+;;mpl 0 1 2
+<<<<<<[-]>>>>>[-<<<<<+>>>>>]<<<<<[->>>>>+<<<<<<<<<<+>>>>>][-]>>>>>>[-<<<<<<+>>>>>>]<<<<<<[->>>>>>+<<<<<<<<<<+>>>>]<<<<<[>[->+>+<<]>>[-<<+>>]<<<-]>>>>>[-]<<<[->>>+<<<]>>>[-<<<+>>>>>>>>>>+<<<<<<<]<<<<<[-]>[-]>[-]

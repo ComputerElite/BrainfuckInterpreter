@@ -9,25 +9,6 @@
 ;; reserved characters:
 ;;     ^ => space
 
-stc h 0
-oua 0
-stc e 0
-oua 0
-stc l 0
-oua 0
-stc l 0
-oua 0
-stc o 0
-oua 0
-stc ^ 0
-oua 0
-stc w 0
-oua 0
-stc o 0
-oua 0
-stc r 0
-oua 0
-stc l 0
-oua 0
-stc d 0
-oua 0
+stn 5 0
+stn 7 1
+mpl 0 1 2
