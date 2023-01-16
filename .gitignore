@@ -1,0 +1,10 @@
+﻿/bin
+/BrainfuckInterpreter/BrainfuckInterpreter/obj
+/BrainfuckInterpreter/BrainfuckTestPrograms/obj
+/BrainfuckInterpreterCpp/BrainfuckInterpreterCpp/obj
+/CEBrainfuckCreator/CEBrainfuckCreator/obj
+/CEBrainfuckInterpreter/CEBrainfuckInterpreter/obj
+/BrainfuckInterpreter/.vs
+/BrainfuckInterpreterCpp/.vs
+/CEBrainfuckCreator/.vs
+/CEBrainfuckInterpreter/.vs
