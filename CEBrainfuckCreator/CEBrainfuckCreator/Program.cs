@@ -18,9 +18,9 @@ int[] memory = new int[0xFFFF];
 const int reservedMemoryLength = 10;
 
 // Reserved memory addresses
-// 0: 
-// 1: 
-// 2: 
+// 0: math a
+// 1: math b
+// 2: math result
 // 3: 
 // 4: 
 // 5: copy tmp
@@ -41,17 +41,13 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 	{
 		case "stc":
 			addressA = GetAddress(cmds[2]);
-			GoToMemoryAddress(addressA);
-			
 			value = HandleReservedValue(cmds[1][0]);
-			SetCurrentAddressValue(value);
+			SetAddressValue(addressA, value);
 			break;
 		case "stn":
 			addressA = GetAddress(cmds[2]);
-			GoToMemoryAddress(addressA);
-
 			value = GetAddress(cmds[1]);
-			SetCurrentAddressValue(value);
+			SetAddressValue(addressA, value);
 			break;
 		case "cpy":
 			addressA = GetAddress(cmds[1]);
