@@ -58,10 +58,6 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 			addressB = GetAddress(cmds[2]);
 			Copy(addressA, addressB);
 			break;
-		case "mv":
-			addressA = GetAddress(cmds[1]);
-			GoToMemoryAddress(addressA);
-			break;
 		case "mpl":
 			addressA = GetAddress(cmds[1]);
 			addressB = GetAddress(cmds[2]);
@@ -84,10 +80,6 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 			// output value at address
 			addressA = GetAddress(cmds[1]);
 			GoToMemoryAddress(addressA);
-			bf += ".";
-			break;
-		case "out":
-			// output value
 			bf += ".";
 			break;
 	}
