@@ -7,10 +7,10 @@ using System.Transactions;
 using TextCopy;
 
 string file = "test.cebf";
-string[] lines = File.ReadAllLines(file);
+List<string> lines = File.ReadAllLines(file).ToList();
 
 // Prepare lines: trim
-for (int i = 0; i < lines.Length; i++)
+for (int i = 0; i < lines.Count; i++)
 {
 	lines[i] = lines[i].Trim();
 }
@@ -32,10 +32,22 @@ const int reservedMemoryLength = 10;
 // reserve first 10 memory addresses for variables of the compiler
 bf += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
 
+// pre compile code prepare
+bool stripComments = lines.Any(x => x.ToLower().StartsWith("#nocomment"));
+for (int i = 0; i < lines.Count; i++)
+{
+	if (lines[i].StartsWith(";;") && stripComments)
+	{
+		lines.RemoveAt(i);
+		i--;
+	}
+}
+
 Dictionary<string, int> variables = new Dictionary<string, int>();
 
-for (currentLine = 0; currentLine < lines.Length; currentLine++)
+for (currentLine = 0; currentLine < lines.Count; currentLine++)
 {
+	if (lines[currentLine] == "") continue;
 	string[] cmds = lines[currentLine].Split(' ');
 	string cmd = cmds[0];
 	bf += "\n;;" + lines[currentLine] + "\n";
@@ -50,6 +62,7 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 			string name = cmds[2];
 			if(variables.ContainsKey(name)) variables.Add(name, addressA);
 			variables[name] = addressA;
+			bf += ";;Assigned memory address " + addressA + " the name '" + name + "'\n";
 			break;
 		case "dbg":
 			bf += "#";
@@ -103,13 +116,13 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 			bf += ".";
 			break;
 		case "inc":
-			// output value at address
+			// input value at address
 			addressA = GetAddress(cmds[1]);
 			GoToMemoryAddress(addressA);
 			bf += ",";
 			break;
 		case "oum":
-			// output value at address
+			// output value starting at address for length
 			addressA = GetAddress(cmds[1]);
 			value = ConvertToInt(cmds[2]);
 			for (int i = 0; i < value; i++)
@@ -120,7 +133,7 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 			}
 			break;
 		case "oun":
-			// output value at address
+			// output value starting at address till null
 			addressA = GetAddress(cmds[1]);
 			GoToMemoryAddress(addressA);
 			bf += "[.>]";
@@ -147,10 +160,10 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 			GoToMemoryAddress(addressA);
 			break;
 	}
+	bf += "\n";
 }
 
 // Compiler options:
-bool stripComments = lines.Any(x => x.ToLower().StartsWith("#nocomment"));
 bool minify = lines.Any(x => x.ToLower().StartsWith("#minify"));
 
 string finalBF = "";
@@ -158,7 +171,6 @@ string[] bfLines = bf.Split('\n');
 for (int i = 0; i < bfLines.Length; i++)
 {
 	string finalLine = bfLines[i] + "\n";
-	if (stripComments && finalLine.StartsWith(";")) continue;
 	finalBF += finalLine;
 }
 

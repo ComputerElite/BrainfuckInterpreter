@@ -29,7 +29,8 @@
 ;;   Add #nocomment to strip the finished code of all comments
 ;;   Add #minify to strip all line breaks from the finished code
 
-#minify
+;;#minify
+#nocomment
 
 ;; set a b c variable names
 sad 0 a
