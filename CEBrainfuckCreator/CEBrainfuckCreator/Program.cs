@@ -1,4 +1,8 @@
 ﻿using Microsoft.VisualBasic;
+using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Transactions;
 using TextCopy;
 
@@ -28,6 +32,8 @@ const int reservedMemoryLength = 10;
 // reserve first 10 memory addresses for variables of the compiler
 bf += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
 
+Dictionary<string, int> variables = new Dictionary<string, int>();
+
 for (currentLine = 0; currentLine < lines.Length; currentLine++)
 {
 	string[] cmds = lines[currentLine].Split(' ');
@@ -39,14 +45,32 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 	int value;
 	switch (cmd)
 	{
+		case "sad":
+			addressA = GetAddress(cmds[1]);
+			string name = cmds[2];
+			if(variables.ContainsKey(name)) variables.Add(name, addressA);
+			variables[name] = addressA;
+			break;
+		case "dbg":
+			bf += "#";
+			break;
 		case "stc":
 			addressA = GetAddress(cmds[2]);
 			value = HandleReservedValue(cmds[1][0]);
 			SetAddressValue(addressA, value);
 			break;
+		case "sts":
+			addressA = GetAddress(cmds[2]);
+			foreach (char c in cmds[1])
+			{
+				SetAddressValue(addressA, HandleReservedValue(c));
+				addressA++;
+			}
+			SetAddressValue(addressA, 0);
+			break;
 		case "stn":
 			addressA = GetAddress(cmds[2]);
-			value = GetAddress(cmds[1]);
+			value = ConvertToInt(cmds[1]);
 			SetAddressValue(addressA, value);
 			break;
 		case "cpy":
@@ -78,7 +102,119 @@ for (currentLine = 0; currentLine < lines.Length; currentLine++)
 			GoToMemoryAddress(addressA);
 			bf += ".";
 			break;
+		case "inc":
+			// output value at address
+			addressA = GetAddress(cmds[1]);
+			GoToMemoryAddress(addressA);
+			bf += ",";
+			break;
+		case "oum":
+			// output value at address
+			addressA = GetAddress(cmds[1]);
+			value = ConvertToInt(cmds[2]);
+			for (int i = 0; i < value; i++)
+			{
+				GoToMemoryAddress(addressA);
+				bf += ".";
+				addressA++;
+			}
+			break;
+		case "oun":
+			// output value at address
+			addressA = GetAddress(cmds[1]);
+			GoToMemoryAddress(addressA);
+			bf += "[.>]";
+			break;
+
+
+		case "and":
+			// output value at address
+			addressA = GetAddress(cmds[1]);
+			addressB = GetAddress(cmds[2]);
+			addressC = GetAddress(cmds[3]);
+			ANDGate(addressA, addressB, addressC);
+			break;
+		case "oor":
+			// output value at address
+			addressA = GetAddress(cmds[1]);
+			addressB = GetAddress(cmds[2]);
+			addressC = GetAddress(cmds[3]);
+			ORGate(addressA, addressB, addressC);
+			break;
+		case "mov":
+			// output value at address
+			addressA = GetAddress(cmds[1]);
+			GoToMemoryAddress(addressA);
+			break;
 	}
+}
+
+// Compiler options:
+bool stripComments = lines.Any(x => x.ToLower().StartsWith("#nocomment"));
+bool minify = lines.Any(x => x.ToLower().StartsWith("#minify"));
+
+string finalBF = "";
+string[] bfLines = bf.Split('\n');
+for (int i = 0; i < bfLines.Length; i++)
+{
+	string finalLine = bfLines[i] + "\n";
+	if (stripComments && finalLine.StartsWith(";")) continue;
+	finalBF += finalLine;
+}
+
+string allowedChars = "<>+\\-\\[\\].,#";
+
+if(minify)
+{
+	finalBF = Regex.Replace(finalBF, "[^" + allowedChars + "]", "");
+}
+
+Console.WriteLine("Finished bf: \n\n" + finalBF);
+ClipboardService.SetText(finalBF);
+
+
+
+
+
+/////////////////////// Helper methods
+
+void ANDGate(int addressA, int addressB, int addressC)
+{
+
+	StartMathOperation(addressA, addressB, addressC);
+	bf += "[->+<]++[->-<]>>[-]+<[>-<[-]]<";
+	EndMathOperation(addressA, addressB, addressC);
+}
+
+void ORGate(int addressA, int addressB, int addressC)
+{
+	StartMathOperation(addressA, addressB, addressC);
+	bf += "[->+<]>>[-]<[>+<[-]]<";
+	EndMathOperation(addressA, addressB, addressC);
+}
+
+void StartMathOperation(int addressA, int addressB, int addressC)
+{
+	int tmpAAddress = GetBFCompilerMemoryAddress(0);
+	int tmpBAddress = GetBFCompilerMemoryAddress(1);
+	ResetAddressValue(tmpAAddress);
+	ResetAddressValue(tmpBAddress);
+	ResetAddressValue(addressC);
+	Copy(addressA, tmpAAddress);
+	Copy(addressB, tmpBAddress);
+	GoToMemoryAddress(tmpAAddress);
+}
+
+void EndMathOperation(int addressA, int addressB, int addressC)
+{
+	int tmpAAddress = GetBFCompilerMemoryAddress(0);
+	int tmpBAddress = GetBFCompilerMemoryAddress(1);
+	int tmpCAddress = GetBFCompilerMemoryAddress(2);
+	Copy(tmpCAddress, addressC);
+	GoToMemoryAddress(addressC);
+	ResetAddressValue(tmpAAddress);
+	ResetAddressValue(tmpBAddress);
+	ResetAddressValue(tmpCAddress);
 }
 
 int HandleReservedValue(int value)
@@ -86,10 +222,24 @@ int HandleReservedValue(int value)
 	if (value == '^') return ' ';
 	return value;
 }
+
+int ConvertToInt(string number)
+{
+	return Convert.ToInt32(number);
+}
 	 
 int GetAddress(string address)
 {
-	return Convert.ToInt32(address);
+	if(address.StartsWith("$"))
+	{
+		string varName = address.Substring(1);
+		if (variables.ContainsKey(varName))
+		{
+			return variables[varName];
+		}
+		return 0;
+	}
+	return ConvertToInt(address);
 }
 
 void SetAddressValue(int address, int value)
@@ -138,20 +288,9 @@ void MoveValue(int addressA, int addressB)
 
 void MultiplyAddresses(int addressA, int addressB, int endAddress)
 {
-	int tmpAAddress = GetBFCompilerMemoryAddress(0);
-	int tmpBAddress = GetBFCompilerMemoryAddress(1);
-	int tmpEndAddress = GetBFCompilerMemoryAddress(2);
-
-	Copy(addressA, tmpAAddress);
-	Copy(addressB, tmpBAddress);
-	GoToMemoryAddress(tmpAAddress);
-
+	EndMathOperation(addressA, addressB, endAddress);
 	bf += "[>[->+>+<<]>>[-<<+>>]<<<-]";
-
-	Copy(tmpEndAddress, endAddress);
-	ResetAddressValue(tmpAAddress);
-	ResetAddressValue(tmpBAddress);
-	ResetAddressValue(tmpEndAddress);
+	EndMathOperation(addressA, addressB, endAddress);
 }
 
 void AddAddresses(int addressA, int addressB, int endAddress)
@@ -196,7 +335,3 @@ void GoToMemoryAddress(int address)
 	bf += GetAddressMove(currentMemoryAddress - address);
 	currentMemoryAddress = address;
 }
-
-
-Console.WriteLine("Finished bf: \n\n" + bf);
-ClipboardService.SetText(bf);

@@ -65,7 +65,7 @@ namespace CEBrainFuck
 					Console.Clear();
 					Console.SetCursorPosition(0, 10);
 					Console.Write("Open loops: " + lastLoopOpen.Count + ", loop 0: " + (lastLoopOpen.Count >= 1 ? lastLoopOpen[0] : -2) + "\nPosition: " + programPosition);
-					Console.SetCursorPosition(0, 1);
+					Console.SetCursorPosition(0, 1);   
 
 					int startPos = programPosition - 60;
 					if (startPos < 0) startPos = 0;
@@ -127,6 +127,8 @@ namespace CEBrainFuck
 			}
 			Console.WriteLine("");
 			Console.WriteLine("");
+			Display();
+			Console.CursorTop += 2;
 			//Console.WriteLine(programPosition);
 		}
 
