@@ -359,5 +359,5 @@ void GoToMemoryAddress(int address)
 void AddCommentInNewLine(string comment)
 {
 	if (!bf.EndsWith("\n")) bf += "\n";
-	bf += ";;" + comment + "\n";
+	bf += ";;   " + comment + "\n";
 }
