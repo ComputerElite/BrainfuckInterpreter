@@ -26,11 +26,13 @@
 
 ;; compiler:
 ;;   Make comments with ;;
-;;   Add #nocomment to strip the finished code of all comments
-;;   Add #minify to strip all line breaks from the finished code
+;;   Add #nocomment to strip the all comments from this file
+;;   Add #minify to strip all line breaks and compiler added comments from the finished code
+;;   Add #commentcode to let the compiler comment the brainfuck code
 
 ;;#minify
 #nocomment
+#commentcode
 
 ;; set a b c variable names
 sad 0 a

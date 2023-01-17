@@ -34,6 +34,7 @@ bf += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory 
 
 // pre compile code prepare
 bool stripComments = lines.Any(x => x.ToLower().StartsWith("#nocomment"));
+bool commentCode = lines.Any(x => x.ToLower().StartsWith("#commentcode"));
 for (int i = 0; i < lines.Count; i++)
 {
 	if (lines[i].StartsWith(";;") && stripComments)
@@ -62,7 +63,7 @@ for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			string name = cmds[2];
 			if(variables.ContainsKey(name)) variables.Add(name, addressA);
 			variables[name] = addressA;
-			bf += ";;Assigned memory address " + addressA + " the name '" + name + "'\n";
+			if(commentCode) bf += ";;Assigned memory address " + addressA + " the name '" + name + "'\n";
 			break;
 		case "dbg":
 			bf += "#";
@@ -192,8 +193,8 @@ ClipboardService.SetText(finalBF);
 
 void ANDGate(int addressA, int addressB, int addressC)
 {
-
 	StartMathOperation(addressA, addressB, addressC);
+	if (commentCode) AddCommentInNewLine("Perform AND operation on " + addressA + " and " + addressB + " and store result in " + addressC);
 	bf += "[->+<]++[->-<]>>[-]+<[>-<[-]]<";
 	EndMathOperation(addressA, addressB, addressC);
 }
@@ -201,6 +202,7 @@ void ANDGate(int addressA, int addressB, int addressC)
 void ORGate(int addressA, int addressB, int addressC)
 {
 	StartMathOperation(addressA, addressB, addressC);
+	if (commentCode) AddCommentInNewLine("Perform OR operation on " + addressA + " and " + addressB + " and store result in " + addressC);
 	bf += "[->+<]>>[-]<[>+<[-]]<";
 	EndMathOperation(addressA, addressB, addressC);
 }
@@ -263,16 +265,15 @@ void SetAddressValue(int address, int value)
 void ResetAddressValue(int address)
 {
 	GoToMemoryAddress(address);
+	if (commentCode) AddCommentInNewLine("Set address value to 0");
 	bf += "[-]";
 }
 
 void SetCurrentAddressValue(int value)
 {
-	int oldValue = memory[reservedMemoryLength + currentMemoryAddress] + 0;
-	memory[reservedMemoryLength + currentMemoryAddress] = value;
 	// set value;
-	char sign = oldValue > value ? '-' : '+';
-	bf += new string(sign, Math.Abs(oldValue - value));
+	if (commentCode) AddCommentInNewLine("Set address value to " + value);
+	bf += "[-]" + new string('+', value);
 }
 string GetAddressMove(int diff)
 {
@@ -287,6 +288,7 @@ void Copy(int addressA, int addressB)
 	ResetAddressValue(tmpAddress);
 	MoveValue(addressA, tmpAddress);
 	GoToMemoryAddress(tmpAddress);
+	if (commentCode) AddCommentInNewLine("Move value from address " + tmpAddress + " into " + addressA + " and " + addressB);
 	bf += "[-" + GetAddressMove(tmpAddress - addressA) + "+" + GetAddressMove(addressA - addressB) + "+" + GetAddressMove(addressB - tmpAddress) + "]";
 	GoToMemoryAddress(tmpAddress);
 }
@@ -294,13 +296,15 @@ void Copy(int addressA, int addressB)
 void MoveValue(int addressA, int addressB)
 {
 	GoToMemoryAddress(addressA);
-	
+
+	if (commentCode) AddCommentInNewLine("Move value from address " + addressA + " into " + addressB);
 	bf += "[-" + GetAddressMove(addressA - addressB) + "+" + GetAddressMove(addressB - addressA) + "]";
 }
 
 void MultiplyAddresses(int addressA, int addressB, int endAddress)
 {
 	EndMathOperation(addressA, addressB, endAddress);
+	if (commentCode) AddCommentInNewLine("current address with next address and store result in the address after");
 	bf += "[>[->+>+<<]>>[-<<+>>]<<<-]";
 	EndMathOperation(addressA, addressB, endAddress);
 }
@@ -315,6 +319,7 @@ void AddAddresses(int addressA, int addressB, int endAddress)
 	GoToMemoryAddress(tmpAAddress);
 
 	bf += "[->+<]";
+	if (commentCode) AddCommentInNewLine("Add current address to next address");
 
 	Copy(tmpBAddress, endAddress);
 	ResetAddressValue(tmpAAddress);
@@ -330,6 +335,7 @@ void SubstractAddresses(int addressA, int addressB, int endAddress)
 	Copy(addressB, tmpBAddress);
 	GoToMemoryAddress(tmpAAddress);
 
+	if (commentCode) AddCommentInNewLine("Subtract current address from next address");
 	bf += "[->-<]";
 
 	Copy(tmpBAddress, endAddress);
@@ -344,6 +350,14 @@ int GetBFCompilerMemoryAddress(int address)
 
 void GoToMemoryAddress(int address)
 {
+
+	if (commentCode) AddCommentInNewLine("Move pointer from address " + currentMemoryAddress + " to " + address);
 	bf += GetAddressMove(currentMemoryAddress - address);
 	currentMemoryAddress = address;
+}
+
+void AddCommentInNewLine(string comment)
+{
+	if (!bf.EndsWith("\n")) bf += "\n";
+	bf += ";;" + comment + "\n";
 }
