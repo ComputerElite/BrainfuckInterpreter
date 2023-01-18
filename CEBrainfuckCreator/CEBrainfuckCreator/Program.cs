@@ -21,6 +21,7 @@ namespace CEBrainfuckCreator
 		public static bool stripComments;
 		public static bool commentCode;
 		public static bool minify;
+		public static bool oMovement;
 		public const string allowedChars = "<>+\\-\\[\\].,#";
 
 		public static void Main(string[] args)
@@ -216,6 +217,7 @@ namespace CEBrainfuckCreator
 
 			// Compiler options:
 			minify = lines.Any(x => x.ToLower().StartsWith("#minify"));
+			oMovement = lines.Any(x => x.ToLower().StartsWith("#omovement"));
 
 			string finalBF = "";
 			string[] bfLines = bf.Split('\n');
@@ -223,6 +225,16 @@ namespace CEBrainfuckCreator
 			{
 				string finalLine = bfLines[i] + "\n";
 				finalBF += finalLine;
+			}
+
+			if(oMovement)
+			{
+				string oldBF = "";
+				while (oldBF.Length != finalBF.Length)
+				{
+					oldBF = finalBF;
+					finalBF = finalBF.Replace("<>", "").Replace("><", "");
+				}
 			}
 
 			if (minify)

@@ -34,8 +34,10 @@
 ;;   Add #nocomment to strip the all comments from this file
 ;;   Add #minify to strip all line breaks and compiler added comments from the finished code
 ;;   Add #commentcode to let the compiler comment the brainfuck code
+;;   Add #omovement optimizes the pointer movement
 
 #nocomment
+#omovement
 
 
 ;; set a b c variable names
