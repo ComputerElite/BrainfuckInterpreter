@@ -1,0 +1,50 @@
+;; stc character address            sets value into address (character)
+;; stn number address               sets value into address (number)
+;; sts string startAddress          Adds a null terminated string starting at the startAddress
+;; oua address                      outputs at address
+;; oub address                      outputs True or False at address
+;; ous string                       outputs string
+;; oum startAddress length          outputs length addresses starting at startAddress
+;; oun startAddress                 outputs all memory addresses incrementally till it hits null
+;; inc address                      Saves a input character to the address
+;; cpy addressA addressB            copies addressA to addressB
+;; mpl addressA addressB addressC   multiplies addressA and addressB and stores in addressC
+;; add addressA addressB addressC   adds addressA and addressB and stores in addressC
+;; sub addressA addressB addressC   subtracts addressA from addressB and stores in addressC
+;;
+;; mov address                      moves the pointer to the given address
+;;
+;; GATES
+;; and addressA addressB addressC   AND gate    if a and b then c is 1
+;; nnd addressA addressB addressC   NAND gate   if a and b then c is 0 else 1
+;; oor addressA addressB addressC   OR gate     if a or b then c is 1
+;; xor addressA addressB addressC   XOR gate    if a and b are different then c is 1
+;; not addressA addressB            NOT gate    if a is 1 then b is 0 and vice versa
+;;
+;; dbg                              Shows debug output on brainfuck helper vsc extension
+;; sad address name                 gives an address a name you can use and access with $name on everything that uses addresses
+;;     e g sad 10 test
+;;           stn 10 $test
+
+;; reserved characters:
+;;     ^: space
+
+;; compiler:
+;;   Make comments with ;;
+;;   Add #nocomment to strip the all comments from this file
+;;   Add #minify to strip all line breaks and compiler added comments from the finished code
+;;   Add #commentcode to let the compiler comment the brainfuck code
+;;   Add #omovement optimizes the pointer movement
+
+#nocomment
+#omovement
+#commentcode
+
+
+;; set a and b variable names
+sad 0 a
+sad 1 b
+sad 2 res
+stn 5 $a
+stn 10 $b
+mpl $a $b $res

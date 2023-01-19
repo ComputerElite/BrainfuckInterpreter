@@ -172,6 +172,14 @@ namespace CEBrainfuckCreator
 						addressA = GetAddress(cmds[1]);
 						IF(addressA, GetOutputStringCode("True\n"), GetOutputStringCode("False\n"));
 						break;
+					case "cmp":
+						// output value at address
+						addressA = GetAddress(cmds[1]);
+						addressB = GetAddress(cmds[2]);
+						addressC = GetAddress(cmds[3]);
+						Compare(addressA, addressB, addressC);
+						break;
+
 					case "and":
 						// output value at address
 						addressA = GetAddress(cmds[1]);
@@ -243,7 +251,8 @@ namespace CEBrainfuckCreator
 			}
 
 			Console.WriteLine("Finished bf: \n\n" + finalBF);
-			ClipboardService.SetText(finalBF);
+			//ClipboardService.SetText(finalBF);
+			File.WriteAllText("compiled.bf", finalBF);
 		}
 
 		/////////////////////// Helper methods
@@ -264,6 +273,10 @@ namespace CEBrainfuckCreator
 			string moveToStartAddressCode = GetAddressMove(tmpTrueAddress - startAddress);
 			string moveBackCode = GetAddressMove(startAddress - tmpTrueAddress);
 			bf += "[[-]>[-]" + moveToStartAddressCode + onTrue + moveBackCode + "<]>[[-]" + moveToStartAddressCode + onFalse + moveBackCode + "]<";
+		}
+
+		public static void Compare(int addressA, int addressB, int addressC) {
+
 		}
 
 		public static void OutputString(string s)
@@ -478,7 +491,7 @@ namespace CEBrainfuckCreator
 
 		public static void MultiplyAddresses(int addressA, int addressB, int endAddress)
 		{
-			EndMathOperation(addressA, addressB, endAddress);
+			StartMathOperation(addressA, addressB, endAddress);
 			if (commentCode) AddCommentInNewLine("current address with next address and store result in the address after");
 			bf += "[>[->+>+<<]>>[-<<+>>]<<<-]";
 			EndMathOperation(addressA, addressB, endAddress);
