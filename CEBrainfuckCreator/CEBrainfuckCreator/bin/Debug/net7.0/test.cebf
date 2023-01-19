@@ -38,13 +38,28 @@
 
 #nocomment
 #omovement
-#commentcode
+;;#commentcode
 
 
 ;; set a and b variable names
-sad 0 a
-sad 1 b
-sad 2 res
-stn 5 $a
-stn 10 $b
-mpl $a $b $res
+sad 0 fortyeight
+sad 1 a
+sad 2 b
+sad 3 res
+
+;; zahlen als string einlesen
+ous Zahl 1: 
+inc $a
+ous Zahl 2:
+inc $b
+
+;; remove 48 from a and b
+stn 48 $fortyeight
+sub $fortyeight $a 4
+sub $fortyeight $b 5
+
+;; multiply
+mpl 4 5 $res
+
+;; move pointer to result
+mov $res
