@@ -15,7 +15,7 @@ namespace CEBrainfuckCreator
 		public static string bfReal = "";
 		public static int currentMemoryAddress = 0;
 		public static int currentLine = 0;
-		public const int reservedMemoryLength = 12;
+		public const int reservedMemoryLength = 13;
 		public static Dictionary<string, int> variables = new Dictionary<string, int>();
 
 		// compiler options
@@ -56,10 +56,11 @@ namespace CEBrainfuckCreator
 			// 8: 
 			// 9: copy tmp
 			// 10: instruction pointer
-			// 11: instruction pointer check
+			// 11: instruction pointer copy
+			// 12: instruction pointer check
 
 			int instructionPointerAddress = GetBFCompilerMemoryAddress(10);
-
+			bfReal = "timeout:200\n";
 			// reserve first 10 memory addresses for variables of the compiler
 			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
 			
@@ -96,6 +97,13 @@ namespace CEBrainfuckCreator
 				}
 				switch (cmd)
 				{
+					case "jmp":
+						nextInstruction = ConvertToInt(cmds[1]);
+						break;
+					case "jmp/nz":
+						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, ConvertToInt(cmds[1]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
+						nextInstruction = instructionCounter;
+						break;
 					case "sad":
 						addressA = GetAddress(cmds[1]);
 						string name = cmds[2];
@@ -237,14 +245,11 @@ namespace CEBrainfuckCreator
 						break;
 				}
 				GoToMemoryAddress(instructionPointerAddress);
-				int instructionDiff = nextInstruction - instructionCounter;
-				if(instructionDiff < 0) {
-					instructionDiff = lines.Count - instructionCounter - instructionDiff;
-				}
+				int instructionDiff = GetInstructionDiff(instructionCounter, nextInstruction, lines);
 				string instruction = bf + new string('+', instructionDiff);
 				
 				bf = "";
-				bfReal += "->+<[>[-]<]>[[-]" + instruction + "]<";
+				bfReal += "-" + "[->+>+<<]>>[-<<+>>]<" + ">+<[>[-]<[-]]>[[-]<<" + instruction + ">>]<<";
 				instructionCounter++;
 			}
 
@@ -282,6 +287,16 @@ namespace CEBrainfuckCreator
 			File.WriteAllText("compiled.bf", finalBF);
 		}
 
+		public static int GetInstructionDiff(int instructionCounter, int nextInstruction, List<string> lines) {
+				int instructionDiff = nextInstruction - instructionCounter;
+				if(nextInstruction == 0) {
+					instructionDiff = 0;
+				} else if(instructionDiff < 0 && nextInstruction != 0) {
+					instructionDiff = lines.Count - instructionCounter - instructionDiff - 1;
+				}
+				return instructionDiff;
+		}
+
 		/////////////////////// Helper methods
 
 		/// <summary>
@@ -289,7 +304,7 @@ namespace CEBrainfuckCreator
 		/// </summary>
 		public static void IF(int address, string onTrue, string onFalse)
 		{
-			int startAddress = currentMemoryAddress + 0;
+			int startAddress = currentMemoryAddress;
 			int tmpValueAddress = GetBFCompilerMemoryAddress(0);
 			int tmpTrueAddress = GetBFCompilerMemoryAddress(1);
 

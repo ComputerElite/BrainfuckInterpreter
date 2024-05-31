@@ -1,2 +1,11 @@
-sts Hello^World 1
-oun 1
+
+;;test
+;;test
+;;test
+ous Hello
+;;test
+stn 0 1
+
+;;test
+jmp/nz 1 1
+ous loop
