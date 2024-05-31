@@ -12,9 +12,10 @@ namespace CEBrainfuckCreator
 	{
 
 		public static string bf = "";
+		public static string bfReal = "";
 		public static int currentMemoryAddress = 0;
 		public static int currentLine = 0;
-		public const int reservedMemoryLength = 10;
+		public const int reservedMemoryLength = 12;
 		public static Dictionary<string, int> variables = new Dictionary<string, int>();
 
 		// compiler options
@@ -40,6 +41,8 @@ namespace CEBrainfuckCreator
 				lines[i] = lines[i].Trim();
 			}
 
+			int instructionCounter = 1;
+
 
 			// Reserved memory addresses
 			// 0: math a
@@ -52,9 +55,18 @@ namespace CEBrainfuckCreator
 			// 7: 
 			// 8: 
 			// 9: copy tmp
+			// 10: instruction pointer
+			// 11: instruction pointer check
+
+			int instructionPointerAddress = GetBFCompilerMemoryAddress(10);
 
 			// reserve first 10 memory addresses for variables of the compiler
-			bf += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
+			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
+			
+			GoToMemoryAddress(instructionPointerAddress);
+			bfReal += bf;
+			bf = "";
+			bfReal += "+["; // Start state machine
 
 			// pre compile code prepare
 			stripComments = lines.Any(x => x.ToLower().StartsWith("#nocomment"));
@@ -73,11 +85,15 @@ namespace CEBrainfuckCreator
 				if (lines[currentLine] == "") continue;
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				string cmd = cmds[0];
-				bf += "\n;;" + lines[currentLine] + "\n";
+				bfReal += "\n;;" + lines[currentLine] + "\n";
 				int addressA;
 				int addressB;
 				int addressC;
 				int value;
+				int nextInstruction = instructionCounter + 1;
+				if(currentLine == lines.Count - 1) {
+					nextInstruction = 0;
+				}
 				switch (cmd)
 				{
 					case "sad":
@@ -220,15 +236,26 @@ namespace CEBrainfuckCreator
 						GoToMemoryAddress(addressA);
 						break;
 				}
-				bf += "\n";
+				GoToMemoryAddress(instructionPointerAddress);
+				int instructionDiff = nextInstruction - instructionCounter;
+				if(instructionDiff < 0) {
+					instructionDiff = lines.Count - instructionCounter - instructionDiff;
+				}
+				string instruction = bf + new string('+', instructionDiff);
+				
+				bf = "";
+				bfReal += "->+<[>[-]<]>[[-]" + instruction + "]<";
+				instructionCounter++;
 			}
+
+			bfReal += "]"; // End state machine loop
 
 			// Compiler options:
 			minify = lines.Any(x => x.ToLower().StartsWith("#minify"));
 			oMovement = lines.Any(x => x.ToLower().StartsWith("#omovement"));
 
 			string finalBF = "";
-			string[] bfLines = bf.Split('\n');
+			string[] bfLines = bfReal.Split('\n');
 			for (int i = 0; i < bfLines.Length; i++)
 			{
 				string finalLine = bfLines[i] + "\n";
@@ -276,7 +303,9 @@ namespace CEBrainfuckCreator
 		}
 
 		public static void Compare(int addressA, int addressB, int addressC) {
-
+			
+			// compare addressA to addressB and set C to 1 if a ist larger than b
+            
 		}
 
 		public static void OutputString(string s)
@@ -290,7 +319,7 @@ namespace CEBrainfuckCreator
 		}
 
 		public static string GetOutputStringCode(string s)
-		{
+		{ 
 			string bf = GetAddressMove(currentMemoryAddress - GetBFCompilerMemoryAddress(9));
 			foreach (char c in s)
 			{
