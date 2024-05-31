@@ -24,6 +24,7 @@ namespace CEBrainfuckCreator
 		public static bool minify;
 		public static bool oMovement;
 		public const string allowedChars = "<>+\\-\\[\\].,#";
+		public static Dictionary<string, int> labels = new Dictionary<string, int>();
 
 		public static void Main(string[] args)
 		{
@@ -80,13 +81,16 @@ namespace CEBrainfuckCreator
 					i--;
 				}
 			}
-
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
-				if (lines[currentLine] == "") continue;
+				if (lines[currentLine] == "") lines[currentLine] = ";;Hi, you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				string cmd = cmds[0];
 				bfReal += "\n;;" + lines[currentLine] + "\n";
+				if(lines[currentLine].StartsWith(":")) {
+					string label = lines[currentLine].Substring(1);
+					labels.Add(label, instructionCounter);
+				}
 				int addressA;
 				int addressB;
 				int addressC;
@@ -101,7 +105,7 @@ namespace CEBrainfuckCreator
 						nextInstruction = ConvertToInt(cmds[1]);
 						break;
 					case "jmp/nz":
-						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, ConvertToInt(cmds[1]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
+						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[1]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
 						nextInstruction = instructionCounter;
 						break;
 					case "sad":
@@ -285,6 +289,13 @@ namespace CEBrainfuckCreator
 			Console.WriteLine("Finished bf: \n\n" + finalBF);
 			//ClipboardService.SetText(finalBF);
 			File.WriteAllText("compiled.bf", finalBF);
+		}
+
+		public static int GetInstruction(string instruction) {
+			if(labels.ContainsKey(instruction)) {
+				return labels[instruction];
+			}
+			return ConvertToInt(instruction);
 		}
 
 		public static int GetInstructionDiff(int instructionCounter, int nextInstruction, List<string> lines) {

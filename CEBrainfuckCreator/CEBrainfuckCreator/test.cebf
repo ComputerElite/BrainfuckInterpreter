@@ -1,11 +1,6 @@
-
-;;test
-;;test
-;;test
+;; test
+:start
 ous Hello
-;;test
 stn 0 1
-
-;;test
-jmp/nz 1 1
+jmp/nz 1 start
 ous loop
