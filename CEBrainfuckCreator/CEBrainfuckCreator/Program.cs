@@ -40,6 +40,10 @@ namespace CEBrainfuckCreator
 			for (int i = 0; i < lines.Count; i++)
 			{
 				lines[i] = lines[i].Trim();
+				if(lines[i] == ""){
+					lines.RemoveAt(i);
+					i--;
+				}
 			}
 
 			int instructionCounter = 1;
