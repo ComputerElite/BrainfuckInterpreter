@@ -29,7 +29,7 @@
 ;; reserved characters:
 ;;     ^: space
 
-;; __macros__
+;; __MACROS__
 ;; macro <name> <argumentCount>                           starts a macro. Use $0 $1 $2 ... to get the arguments of your macro
 ;; macroend                                               End of a macro
 ;; calling a macro: <macro name> <arg0> <arg1> <arg2> ...
