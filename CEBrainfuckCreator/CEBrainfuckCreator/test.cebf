@@ -1,6 +1,7 @@
 ;; test
-:start
-ous Hello
-stn 0 1
-jmp/nz 1 start
-ous loop
+macro test 2
+ous $0
+ous $1
+macroend
+
+test Holy macaroi

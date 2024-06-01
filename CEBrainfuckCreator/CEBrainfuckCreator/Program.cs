@@ -25,16 +25,23 @@ namespace CEBrainfuckCreator
 		public static bool oMovement;
 		public const string allowedChars = "<>+\\-\\[\\].,#";
 		public static Dictionary<string, int> labels = new Dictionary<string, int>();
+		public static Dictionary<string, BrainfuckMacro> macros = new Dictionary<string, BrainfuckMacro>();
 
 		public static void Main(string[] args)
 		{
 			Generate();
 		}
 
+		public static void Error(int line, string error) {
+			Console.ForegroundColor = ConsoleColor.Red;
+			Console.WriteLine(line + ": " + lines[line] + "\n        " + error);
+		}
+		public static List<string> lines = new List<string>();
+
 		public static void Generate()
 		{
 			string file = "test.cebf";
-			List<string> lines = File.ReadAllLines(file).ToList();
+			lines = File.ReadAllLines(file).ToList();
 
 			// Prepare lines: trim
 			for (int i = 0; i < lines.Count; i++)
@@ -65,7 +72,7 @@ namespace CEBrainfuckCreator
 			// 12: instruction pointer check
 
 			int instructionPointerAddress = GetBFCompilerMemoryAddress(10);
-			bfReal = "";
+			bfReal = "timeout:200\n";
 			// reserve first 10 memory addresses for variables of the compiler
 			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
 			
@@ -85,9 +92,46 @@ namespace CEBrainfuckCreator
 					i--;
 				}
 			}
+
+			// parse functions
+			bool inFunction = false;
+			string currentFunctionName = "";
+			string currentFunction = "";
+			int argumentCount = 0;
+			for(currentLine = 0; currentLine < lines.Count; currentLine++) {
+				if(lines[currentLine].StartsWith("macroend")) {
+					inFunction = false;
+					macros.Add(currentFunctionName, new BrainfuckMacro {
+						name = currentFunctionName,
+						argumentCount = argumentCount,
+						content = currentFunction
+					});
+					lines[currentLine] = ";;" + lines[currentLine];
+				}
+				if(inFunction) {
+					currentFunction += lines[currentLine] + "\n";
+					lines[currentLine] = ";;" + lines[currentLine];
+				}
+				List<string> cmds = lines[currentLine].Split(' ').ToList();
+				if(cmds[0] == "macro") {
+					inFunction = true;
+					currentFunction = "";
+					currentFunctionName = cmds[1];
+					try {
+						argumentCount = ConvertToInt(cmds[2]);
+					} catch(Exception e) {
+						Error(currentLine, "argument count is not a valid number");
+					}
+					lines[currentLine] = ";;" + lines[currentLine];
+				}
+			}
+
+			// Expand all macros
+			ExpandAllMacros();
+
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
-				if (lines[currentLine] == "") lines[currentLine] = ";;Hi, you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
+				if (lines[currentLine] == "") lines[currentLine] = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				string cmd = cmds[0];
 				bfReal += "\n;;" + lines[currentLine] + "\n";
@@ -103,6 +147,7 @@ namespace CEBrainfuckCreator
 				if(currentLine == lines.Count - 1) {
 					nextInstruction = 0;
 				}
+
 				switch (cmd)
 				{
 					case "jmp":
@@ -293,6 +338,21 @@ namespace CEBrainfuckCreator
 			Console.WriteLine("Finished bf: \n\n" + finalBF);
 			//ClipboardService.SetText(finalBF);
 			File.WriteAllText("compiled.bf", finalBF);
+		}
+
+		public static void ExpandAllMacros() {
+			string expandedCode = "";
+			for(int i = 0; i < lines.Count; i++) {
+				List<string> cmds = lines[i].Split(' ').ToList();
+				string macroName = cmds[0];
+				cmds.RemoveAt(0);
+				if(cmds.Count <= 0 || !macros.ContainsKey(macroName)) {
+					expandedCode += lines[i] + "\n";
+					continue;
+				}
+				expandedCode += (commentCode ? ";; entering macro " + macroName + "\n" : "") + macros[macroName].Expand(i, cmds) + "\n" + (commentCode ? ";; exiting macro " + macroName + "\n" : "");
+			}
+			lines = expandedCode.Split('\n').ToList();
 		}
 
 		public static int GetInstruction(string instruction) {
@@ -607,6 +667,23 @@ namespace CEBrainfuckCreator
 		{
 			if (!bf.EndsWith("\n")) bf += "\n";
 			bf += ";;   " + comment + "\n";
+		}
+	}
+
+	public class BrainfuckMacro {
+		public string content {get;set;} = "";
+		public string name {get;set;} = "";
+		public int argumentCount {get;set;} = 0;
+
+		public string Expand(int line, List<string> arguments) {
+			if(arguments.Count != argumentCount) {
+				Program.Error(line, "Expected " + argumentCount + " arguments but " + arguments.Count + " were given.");
+			}
+			string expanded = content;
+			for (int i = 0; i < arguments.Count; i++) {
+				expanded = expanded.Replace("$" + i, arguments[i]);
+			}
+			return expanded.TrimEnd('\n');
 		}
 	}
 }
