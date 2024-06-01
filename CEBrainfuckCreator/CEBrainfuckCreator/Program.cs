@@ -61,7 +61,7 @@ namespace CEBrainfuckCreator
 			// 12: instruction pointer check
 
 			int instructionPointerAddress = GetBFCompilerMemoryAddress(10);
-			bfReal = "timeout:200\n";
+			bfReal = "";
 			// reserve first 10 memory addresses for variables of the compiler
 			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
 			
