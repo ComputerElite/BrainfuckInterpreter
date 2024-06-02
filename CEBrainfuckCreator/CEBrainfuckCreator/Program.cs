@@ -475,9 +475,17 @@ namespace CEBrainfuckCreator
 			Copy(address, tmpValueAddress);
 			SetAddressValue(tmpTrueAddress, 1);
 			GoToMemoryAddress(tmpValueAddress);
-			string moveToStartAddressCode = GetAddressMove(tmpTrueAddress - startAddress);
-			string moveBackCode = GetAddressMove(startAddress - tmpTrueAddress);
-			bf += "[[-]>[-]" + moveToStartAddressCode + onTrue + moveBackCode + "<]>[[-]" + moveToStartAddressCode + onFalse + moveBackCode + "]<";
+			bf += "[[-]>[-]";
+			currentMemoryAddress = tmpTrueAddress;
+			GoToMemoryAddress(startAddress);
+			bf += onTrue;
+			GoToMemoryAddress(tmpTrueAddress);
+			bf += "<]>[[-]";
+			GoToMemoryAddress(startAddress);
+			bf += onFalse;
+			GoToMemoryAddress(tmpTrueAddress);
+			bf += "]<";
+			currentMemoryAddress = tmpValueAddress;
 		}
 
 		public static void OutputString(string s)
@@ -492,13 +500,13 @@ namespace CEBrainfuckCreator
 
 		public static string GetOutputStringCode(string s)
 		{ 
-			string bf = GetAddressMove(currentMemoryAddress - GetBFCompilerMemoryAddress(9));
+			GoToMemoryAddress(GetBFCompilerMemoryAddress(9));
 			foreach (char c in s)
 			{
 				bf += "[-]" + new string('+', c) + ".";
 			}
 			bf += "[-]";
-			bf += GetAddressMove(GetBFCompilerMemoryAddress(9) - currentMemoryAddress);
+			GoToMemoryAddress(currentMemoryAddress);
 			return bf;
 		}
 
@@ -688,7 +696,6 @@ namespace CEBrainfuckCreator
 			MoveValue(addressA, tmpAddress);
 			GoToMemoryAddress(tmpAddress);
 			if (commentCode) AddCommentInNewLine("Move value from address " + GetRealAddress(tmpAddress) + " into " + GetRealAddress(addressA) + " and " + GetRealAddress(addressB));
-		    // new code
 			bf += "[-";
 			GoToMemoryAddress(addressA);
 			bf += "+";
@@ -696,9 +703,6 @@ namespace CEBrainfuckCreator
 			bf += "+";
 			GoToMemoryAddress(tmpAddress);
 			bf += "]";
-			// new code end
-			//bf += "[-" + GetAddressMove(tmpAddress - addressA) + "+" + GetAddressMove(addressA - addressB) + "+" + GetAddressMove(addressB - tmpAddress) + "]";
-			//GoToMemoryAddress(tmpAddress);
 		}
 
 		public static void MoveValue(BrainfuckAddress addressA, BrainfuckAddress addressB)
@@ -706,7 +710,11 @@ namespace CEBrainfuckCreator
 			ResetAddressValue(addressB);
 			GoToMemoryAddress(addressA);
 			if (commentCode) AddCommentInNewLine("Move value from address " + GetRealAddress(addressA) + " into " + GetRealAddress(addressB));
-			bf += "[-" + GetAddressMove(addressA - addressB) + "+" + GetAddressMove(addressB - addressA) + "]";
+			bf += "[-";
+			GoToMemoryAddress(addressB);
+			bf += "+";
+			GoToMemoryAddress(addressA);
+			bf += "]";
 		}
 
 		public static void MultiplyAddresses(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress endAddress)
