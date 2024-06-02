@@ -221,7 +221,6 @@ namespace CEBrainfuckCreator
 					case "set.a":
 						addressA = GetAddress(cmds[1]);
 						addressB = GetAddress(cmds[2]);
-						Console.Write(addressB);
 						SetAddressValue(addressA, addressB.programAddress);
 						break;
 					case "cpy":
@@ -488,6 +487,7 @@ namespace CEBrainfuckCreator
 
 			// store value
 			Copy(address, tmpValueAddress);
+			
 			SetAddressValue(tmpTrueAddress, 1);
 			GoToMemoryAddressNew(tmpValueAddress); // compiler addresses don't need a back
 			bf += "[[-]>[-]";
@@ -588,10 +588,10 @@ namespace CEBrainfuckCreator
 
 		}
 
-		public static BrainfuckAddress GetRealAddress(BrainfuckAddress address)
+		public static int GetRealAddress(BrainfuckAddress address)
 		{
-			address.address += reservedMemoryLength;
-			return address;
+			int tmpAddress = address.address + reservedMemoryLength;
+			return tmpAddress;
 		}
 
 		public static void ORGate(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress addressC)
