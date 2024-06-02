@@ -1,13 +1,12 @@
 #include standard.cebf
-#seperatestatemachine
+;;#seperatestatemachine
 sad 1 a
 sad 2 b
 set.n $a 1
-set.n $b 1
+set.n $b 2
 jmp.eq $a $b success
 jmp end
 :success
 wrt.s It's equal
-
 :end
 wrt.s Done

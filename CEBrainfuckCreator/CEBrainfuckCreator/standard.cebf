@@ -1,4 +1,14 @@
+;; jump if equal
+;; jmp.eq <addressA> <addressB> <label>
 macro jmp.eq 3
+;; subtract both values from each other
 sub $0 $1 $cebf_compiler_7
-jmp.nz $cebf_compiler_7 $2
+;; if the result is 0, the values are equal and thus we jump
+jmp.ez $cebf_compiler_7 $2
+macroend
+
+;; compare two strings
+;; string.compare <addressA> <addressB> <label>
+macro string.compare 3
+
 macroend

@@ -88,11 +88,14 @@ namespace CEBrainfuckCreator
 			// 5: logic gates tmp (XOR)
 			// 6: logic gates tmp (XOR)
 			// 7: Standard library reserved
-			// 8: 
+			// 8: Standard library reserved
 			// 9: copy tmp
 			// 10: instruction pointer
 			// 11: instruction pointer copy
 			// 12: instruction pointer check
+			// 13: pointer reserved (must always be 0)
+			// 14:
+			// 15: pointer
 
 			int instructionPointerAddress = GetBFCompilerMemoryAddress(10);
 			bfReal = "timeout:200\n";
@@ -170,11 +173,11 @@ namespace CEBrainfuckCreator
 					case "jmp":
 						nextInstruction = GetInstruction(cmds[1]);
 						break;
-					case "jmp/nz":
+					case "jmp.nz":
 						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
 						nextInstruction = instructionCounter;
 						break;
-					case "jmp/ez":
+					case "jmp.ez":
 						Console.WriteLine(String.Join(' ', cmds));
 						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]), lines)));
 						nextInstruction = instructionCounter;
@@ -460,7 +463,7 @@ namespace CEBrainfuckCreator
 				} else if(instructionDiff < 0 && nextInstruction != 0) {
 					instructionDiff = lines.Count - instructionCounter - instructionDiff - 1;
 				}
-				bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
+				if(commentCode) bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
 				return instructionDiff;
 		}
 
@@ -690,8 +693,17 @@ namespace CEBrainfuckCreator
 			MoveValue(addressA, tmpAddress);
 			GoToMemoryAddress(tmpAddress);
 			if (commentCode) AddCommentInNewLine("Move value from address " + GetRealAddress(tmpAddress) + " into " + GetRealAddress(addressA) + " and " + GetRealAddress(addressB));
-			bf += "[-" + GetAddressMove(tmpAddress - addressA) + "+" + GetAddressMove(addressA - addressB) + "+" + GetAddressMove(addressB - tmpAddress) + "]";
+		    // new code
+			bf += "[-";
+			GoToMemoryAddress(addressA);
+			bf += "+";
+			GoToMemoryAddress(addressB);
+			bf += "+";
 			GoToMemoryAddress(tmpAddress);
+			bf += "]";
+			// new code end
+			//bf += "[-" + GetAddressMove(tmpAddress - addressA) + "+" + GetAddressMove(addressA - addressB) + "+" + GetAddressMove(addressB - tmpAddress) + "]";
+			//GoToMemoryAddress(tmpAddress);
 		}
 
 		public static void MoveValue(int addressA, int addressB)
@@ -762,6 +774,11 @@ namespace CEBrainfuckCreator
 			if (!bf.EndsWith("\n")) bf += "\n";
 			bf += ";;   " + comment + "\n";
 		}
+	}
+
+	public class BrainfuckAddress {
+		public int address {get;set;} = 0;
+		public bool isPointer {get;set;} = false;
 	}
 
 	public class BrainfuckMacro {
