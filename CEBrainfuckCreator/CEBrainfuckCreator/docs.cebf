@@ -1,22 +1,24 @@
 ;; _______BUILT IN_______
 ;; __INSTRUCTIONS__
-;; set.c <address> <character>                sets value into address (character)
-;; set.n <address> <number>                   sets value into address (number)
-;; set.s <startAddress> <string>              Adds a null terminated string starting at the startAddress
-;; out.r <address>                            outputs at address
-;; out.b <address>                            outputs True or False at address
-;; wrt.s <string>                             outputs string
-;; out.l <startAddress> <n>              outputs n addresses starting at startAddress
-;; out.n <startAddress>                       outputs all memory addresses incrementally till it hits null
-;; in.c <address>                            Saves a input character to the address
-;; cpy <addressA> <addressB>                copies addressA to addressB
-;; mpl <addressA> <addressB> <addressC>     multiplies addressA and addressB and stores in addressC
-;; add <addressA> <addressB> <addressC>     adds addressA and addressB and stores in addressC
-;; sub <addressA> <addressB> <addressC>     subtracts addressA from addressB and stores in addressC
-;; jmp <label>                              jumps to a label
-;; jmp.nz <address> <label>                 jumps to a label if address is not zero
-;; jmp.ez <address> <label>                 jumps to a label if address is zero
-;; mov address                              moves the pointer to the given address (legacy and doesn't have any practical use anymore since implementing the state machine)
+;; set.c <address> <character>                  sets value into address (character)
+;; set.n <address> <number>                     sets value into address (number)
+;; set.s <startAddress> <string>                Adds a null terminated string starting at the startAddress
+;; set.a <addressA> <variable>                  Sets the value of addressA to the address of a variable (for pointers)
+
+;; out.r <address>                              outputs at address
+;; out.b <address>                              outputs True or False at address
+;; wrt.s <string>                               outputs string
+;; out.l <startAddress> <n>                     outputs n addresses starting at startAddress
+;; out.n <startAddress>                         outputs all memory addresses incrementally till it hits null
+;; in.c <address>                               Saves a input character to the address
+;; cpy <addressA> <addressB>                    copies addressA to addressB
+;; mpl <addressA> <addressB> <addressC>         multiplies addressA and addressB and stores in addressC
+;; add <addressA> <addressB> <addressC>         adds addressA and addressB and stores in addressC
+;; sub <addressA> <addressB> <addressC>         subtracts addressA from addressB and stores in addressC
+;; jmp <label>                                  jumps to a label
+;; jmp.nz <address> <label>                     jumps to a label if address is not zero
+;; jmp.ez <address> <label>                     jumps to a label if address is zero
+;; inc <address>                                increments address
 ;;
 ;; __GATES__
 ;; and <addressA> <addressB> <addressC>     AND gate    if a and b then c is 1
@@ -48,7 +50,7 @@
 ;;   Add #nocomment to strip the all comments from this file
 ;;   Add #minify to strip all line breaks and compiler added comments from the finished code
 ;;   Add #commentcode to let the compiler comment the brainfuck code
-;;   Add #omovement optimizes the pointer movement
+;;   Add #noomovement to stop the compiler from optimizing the pointer movement
 ;;   Add #seperatestatemachine to put the state machine code into seperate lines
 
 
