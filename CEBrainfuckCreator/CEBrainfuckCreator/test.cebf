@@ -1,11 +1,13 @@
 #include standard.cebf
 #seperatestatemachine
-stn 1 1
-stn 1 2
-jmp/eq 1 2 success
+sad 1 a
+sad 2 b
+set.n $a 1
+set.n $b 1
+jmp.eq $a $b success
 jmp end
 :success
-ous It's equal
+wrt.s It's equal
 
 :end
-ous Done
+wrt.s Done

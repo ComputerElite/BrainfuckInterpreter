@@ -155,7 +155,7 @@ namespace CEBrainfuckCreator
 				if (lines[currentLine] == "") lines[currentLine] = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				string cmd = cmds[0];
-				bfReal += "\n;;" + lines[currentLine] + "\n";	
+				bfReal += "\n;;" + SanitizeComment(lines[currentLine]) + "\n";	
 				int addressA;
 				int addressB;
 				int addressC;
@@ -187,23 +187,23 @@ namespace CEBrainfuckCreator
 					case "dbg":
 						bf += "#";
 						break;
-					case "stc":
-						addressA = GetAddress(cmds[2]);
-						value = HandleReservedValue(cmds[1][0]);
+					case "set.c":
+						addressA = GetAddress(cmds[1]);
+						value = HandleReservedValue(cmds[2][0]);
 						SetAddressValue(addressA, value);
 						break;
-					case "sts":
-						addressA = GetAddress(cmds[2]);
-						foreach (char c in cmds[1])
+					case "set.s":
+						addressA = GetAddress(cmds[1]);
+						foreach (char c in cmds[2])
 						{
 							SetAddressValue(addressA, HandleReservedValue(c));
 							addressA++;
 						}
 						SetAddressValue(addressA, 0);
 						break;
-					case "stn":
-						addressA = GetAddress(cmds[2]);
-						value = ConvertToInt(cmds[1]);
+					case "set.n":
+						addressA = GetAddress(cmds[1]);
+						value = ConvertToInt(cmds[2]);
 						SetAddressValue(addressA, value);
 						break;
 					case "cpy":
@@ -229,19 +229,19 @@ namespace CEBrainfuckCreator
 						addressC = GetAddress(cmds[3]);
 						SubstractAddresses(addressA, addressB, addressC);
 						break;
-					case "oua":
+					case "out.r":
 						// output value at address
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddress(addressA);
 						bf += ".";
 						break;
-					case "inc":
+					case "in.c":
 						// input value at address
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddress(addressA);
 						bf += ",";
 						break;
-					case "oum":
+					case "out.l":
 						// output value starting at address for length
 						addressA = GetAddress(cmds[1]);
 						value = ConvertToInt(cmds[2]);
@@ -252,22 +252,22 @@ namespace CEBrainfuckCreator
 							addressA++;
 						}
 						break;
-					case "oun":
+					case "out.n":
 						// output value starting at address till null
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddress(addressA);
 						bf += "[.>]";
 						break;
-					case "ous":
-						// output value starting at address till null
+					case "wrt.s":
+						// writes a string to the output
 						cmds.RemoveAt(0);
 						string s = String.Join(" ", cmds);
 						OutputString(s);
 						break;
-					case "oub":
-						// output value starting at address till null
+					case "out.b":
+						// output 'true' if the address is > 0 otherwise 'false'
 						addressA = GetAddress(cmds[1]);
-						IF(addressA, GetOutputStringCode("True\n"), GetOutputStringCode("False\n"));
+						IF(addressA, GetOutputStringCode("true\n"), GetOutputStringCode("false\n"));
 						break;
 					case "cmp":
 						// output value at address
@@ -284,14 +284,14 @@ namespace CEBrainfuckCreator
 						addressC = GetAddress(cmds[3]);
 						ANDGate(addressA, addressB, addressC);
 						break;
-					case "nnd":
+					case "nand":
 						// output value at address
 						addressA = GetAddress(cmds[1]);
 						addressB = GetAddress(cmds[2]);
 						addressC = GetAddress(cmds[3]);
 						NANDGate(addressA, addressB, addressC);
 						break;
-					case "oor":
+					case "or":
 						// output value at address
 						addressA = GetAddress(cmds[1]);
 						addressB = GetAddress(cmds[2]);
@@ -362,6 +362,11 @@ namespace CEBrainfuckCreator
 			File.WriteAllText("compiled.bf", finalBF);
 		}
 
+		private static string SanitizeComment(string comment)
+		{
+			return Regex.Replace(comment, "[" + allowedChars + "]", "\ud83d\udca9");
+		}
+
 		private static void HandleComments()
 		{			
 			for (int i = 0; i < lines.Count; i++)
@@ -376,7 +381,7 @@ namespace CEBrainfuckCreator
 					else
 					{
 						// sanitize comments
-						lines[i] = Regex.Replace(lines[i], "[" + allowedChars + "]", "\ud83d\udca9");
+						lines[i] = SanitizeComment(lines[i]);
 					}
 				}
 			}

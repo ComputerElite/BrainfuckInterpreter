@@ -1,4 +1,4 @@
-macro jmp/eq 3
+macro jmp.eq 3
 sub $0 $1 $cebf_compiler_7
-jmp/nz $cebf_compiler_7 $2
+jmp.nz $cebf_compiler_7 $2
 macroend
