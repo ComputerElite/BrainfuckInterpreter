@@ -1,10 +1,5 @@
-﻿using Microsoft.VisualBasic;
-using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
+﻿using System.Data;
 using System.Text.RegularExpressions;
-using System.Transactions;
-using TextCopy;
 
 namespace CEBrainfuckCreator
 {
@@ -29,29 +24,30 @@ namespace CEBrainfuckCreator
 
 		public static void Main(string[] args)
 		{
-			Generate();
+			try
+			{
+				Generate();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("Error during compilation, check above for more info " + e.ToString());
+			}
 		}
 
 		public static void Error(int line, string error) {
 			Console.ForegroundColor = ConsoleColor.Red;
 			Console.WriteLine(line + ": " + lines[line] + "\n        " + error);
+			throw new Exception();
 		}
 		public static List<string> lines = new List<string>();
 
-		public static void Generate()
+		public static void Generate(string file = "test.cebf")
 		{
-			string file = "test.cebf";
 			lines = File.ReadAllLines(file).ToList();
-
-			// Prepare lines: trim
-			for (int i = 0; i < lines.Count; i++)
-			{
-				lines[i] = lines[i].Trim();
-				if(lines[i] == ""){
-					lines.RemoveAt(i);
-					i--;
-				}
-			}
+			
+			
+			HandleIncludes();
+			TrimLines();
 
 			int instructionCounter = 1;
 
@@ -84,14 +80,8 @@ namespace CEBrainfuckCreator
 			// pre compile code prepare
 			stripComments = lines.Any(x => x.ToLower().StartsWith("#nocomment"));
 			commentCode = lines.Any(x => x.ToLower().StartsWith("#commentcode"));
-			for (int i = 0; i < lines.Count; i++)
-			{
-				if (lines[i].StartsWith(";;") && stripComments)
-				{
-					lines.RemoveAt(i);
-					i--;
-				}
-			}
+			HandleComments();
+
 
 			// parse macros
 			bool inFunction = false;
@@ -342,6 +332,69 @@ namespace CEBrainfuckCreator
 			Console.WriteLine("Finished bf: \n\n" + finalBF);
 			//ClipboardService.SetText(finalBF);
 			File.WriteAllText("compiled.bf", finalBF);
+		}
+
+		private static void HandleComments()
+		{			
+			for (int i = 0; i < lines.Count; i++)
+			{
+				if (lines[i].StartsWith(";;"))
+				{
+					if (stripComments)
+					{
+						lines.RemoveAt(i);
+						i--;
+					}
+					else
+					{
+						// sanitize comments
+						lines[i] = Regex.Replace(lines[i], "[" + allowedChars + "]", "\ud83d\udca9");
+					}
+				}
+			}
+		}
+
+		private static void TrimLines()
+		{
+			// Prepare lines: trim
+			for (int i = 0; i < lines.Count; i++)
+			{
+				lines[i] = lines[i].Trim();
+				if(lines[i] == ""){
+					lines.RemoveAt(i);
+					i--;
+				}
+			}
+		}
+
+		private static List<string> ResolveFile(string name)
+		{
+			if(!File.Exists(name)) {
+				Error(currentLine, "File not found: " + name);
+			}
+			return File.ReadAllLines(name).ToList();
+		}
+
+		private static void HandleIncludes()
+		{
+			bool includedSmth = true;
+			while (includedSmth)
+			{
+				includedSmth = false;
+				for (int i = 0; i < lines.Count; i++)
+				{
+					List<string> cmds = lines[i].Split(' ').ToList();
+					if (cmds[0] == "#include")
+					{
+						cmds.RemoveAt(0);
+						string includeFile = String.Join(' ', cmds);
+						List<string> includeLines = ResolveFile(includeFile);
+						lines.RemoveAt(i);
+						lines.InsertRange(i, includeLines);
+						includedSmth = true;
+					}
+				}
+			}
 		}
 
 		public static void ExpandAllMacros() {

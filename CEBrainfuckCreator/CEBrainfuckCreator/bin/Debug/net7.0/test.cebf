@@ -15,6 +15,7 @@
 ;; jmp <label>                              jumps to a label
 ;; jmp/nz <address> <label>                 jumps to a label if address is not zero
 ;; jmp/ez <address> <label>                 jumps to a label if address is zero
+;; jmp/e1 <addressA> <addressB> <label>     jumps to a label if addressA is equal to addressB
 ;; mov address                              moves the pointer to the given address (legacy and doesn't have any practical use anymore since implementing the state machine)
 ;;
 ;; __GATES__
@@ -24,7 +25,7 @@
 ;; xor <addressA> <addressB> <addressC>     XOR gate    if a and b are different then c is 1
 ;; not <addressA> <addressB>                NOT gate    if a is 1 then b is 0 and vice versa
 ;;
-;; #                              Shows debug output on brainfuck helper vsc extension
+;; dbg                              Shows debug output on brainfuck helper vsc extension
 ;; sad <address> <name>                 gives an address a name you can use and access with $name on everything that uses addresses
 
 ;; reserved characters:
@@ -34,6 +35,9 @@
 ;; macro <name> <argumentCount>                           starts a macro. Use $0 $1 $2 ... to get the arguments of your macro
 ;; macroend                                               End of a macro
 ;; calling a macro: <macro name> <arg0> <arg1> <arg2> ...
+
+;; __INCLUDES__
+;; #include <file/lib name>                  Includes a file from the local file system or standard libraries by replacing the include with the file content
 
 ;; compiler:
 ;;   Make comments with ;;
