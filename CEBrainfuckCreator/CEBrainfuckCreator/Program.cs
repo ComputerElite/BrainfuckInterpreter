@@ -58,12 +58,12 @@ namespace CEBrainfuckCreator
 			int instructionCounter = 0;
 			for(currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
+				instructionCounter++;
 				if(lines[currentLine].StartsWith(":")) {
 					Console.WriteLine("Found label " + lines[currentLine]);
 					string label = lines[currentLine].Substring(1);
 					labels.Add(label, instructionCounter);
 				}
-				instructionCounter++;
 			}
 		}
 
@@ -149,7 +149,7 @@ namespace CEBrainfuckCreator
 
 
 
-			FindLabels(); // must occur right before here
+			FindLabels(); // MUST occur right before here
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
 				if (lines[currentLine] == "") lines[currentLine] = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";

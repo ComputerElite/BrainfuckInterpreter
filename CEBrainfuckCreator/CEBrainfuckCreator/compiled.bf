@@ -56,10 +56,10 @@ timeout:200
 		
 +>>]<<
 ;;jmp end
-;; Instruction diff: 2    next: 14     counter: 12
+;; Instruction diff: 3    next: 15     counter: 12
 -[->+>+<<]>>[-<<+>>]<>+<[>[-]<[-]]>[[-]<<
 		
-++>>]<<
++++>>]<<
 ;;:success
 ;; Instruction diff: 1    next: 14     counter: 13
 -[->+>+<<]>>[-<<+>>]<>+<[>[-]<[-]]>[[-]<<
