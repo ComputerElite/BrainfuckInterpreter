@@ -18,6 +18,7 @@ namespace CEBrainfuckCreator
 		public static bool commentCode;
 		public static bool minify;
 		public static bool oMovement;
+		public static bool seperateStateMachine;
 		public const string allowedChars = "<>+\\-\\[\\].,#";
 		public static Dictionary<string, int> labels = new Dictionary<string, int>();
 		public static Dictionary<string, BrainfuckMacro> macros = new Dictionary<string, BrainfuckMacro>();
@@ -41,6 +42,31 @@ namespace CEBrainfuckCreator
 		}
 		public static List<string> lines = new List<string>();
 
+		private static void AddPredefinedVariables() {
+			for(int i = 0; i < reservedMemoryLength; i++) {
+				AssignVariable("cebf_compiler_" + i, GetBFCompilerMemoryAddress(i));
+			}
+		}
+
+		private static void AssignVariable(string name, int address) {
+			if (variables.ContainsKey(name)) variables.Add(name, address);
+			variables[name] = address;
+			if (commentCode) bf += ";; Assigned memory address " + address + " the name '" + name + "'\n";
+		}
+
+		private static void FindLabels() {
+			int instructionCounter = 0;
+			for(currentLine = 0; currentLine < lines.Count; currentLine++)
+			{
+				if(lines[currentLine].StartsWith(":")) {
+					Console.WriteLine("Found label " + lines[currentLine]);
+					string label = lines[currentLine].Substring(1);
+					labels.Add(label, instructionCounter);
+				}
+				instructionCounter++;
+			}
+		}
+
 		public static void Generate(string file = "test.cebf")
 		{
 			lines = File.ReadAllLines(file).ToList();
@@ -48,6 +74,7 @@ namespace CEBrainfuckCreator
 			
 			HandleIncludes();
 			TrimLines();
+			AddPredefinedVariables();
 
 			int instructionCounter = 1;
 
@@ -60,7 +87,7 @@ namespace CEBrainfuckCreator
 			// 4: logic gates tmp (XOR)
 			// 5: logic gates tmp (XOR)
 			// 6: logic gates tmp (XOR)
-			// 7: 
+			// 7: Standard library reserved
 			// 8: 
 			// 9: copy tmp
 			// 10: instruction pointer
@@ -80,6 +107,7 @@ namespace CEBrainfuckCreator
 			// pre compile code prepare
 			stripComments = lines.Any(x => x.ToLower().StartsWith("#nocomment"));
 			commentCode = lines.Any(x => x.ToLower().StartsWith("#commentcode"));
+			seperateStateMachine = lines.Any(x => x.ToLower().StartsWith("#seperatestatemachine"));
 			HandleComments();
 
 
@@ -119,16 +147,15 @@ namespace CEBrainfuckCreator
 			// Expand all macros
 			ExpandAllMacros();
 
+
+
+			FindLabels(); // must occur right before here
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
 				if (lines[currentLine] == "") lines[currentLine] = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				string cmd = cmds[0];
-				bfReal += "\n;;" + lines[currentLine] + "\n";
-				if(lines[currentLine].StartsWith(":")) {
-					string label = lines[currentLine].Substring(1);
-					labels.Add(label, instructionCounter);
-				}
+				bfReal += "\n;;" + lines[currentLine] + "\n";	
 				int addressA;
 				int addressB;
 				int addressC;
@@ -141,22 +168,21 @@ namespace CEBrainfuckCreator
 				switch (cmd)
 				{
 					case "jmp":
-						nextInstruction = ConvertToInt(cmds[1]);
+						nextInstruction = GetInstruction(cmds[1]);
 						break;
 					case "jmp/nz":
-						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[1]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
+						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
 						nextInstruction = instructionCounter;
 						break;
 					case "jmp/ez":
-						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[1]), lines)));
+						Console.WriteLine(String.Join(' ', cmds));
+						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]), lines)));
 						nextInstruction = instructionCounter;
 						break;
 					case "sad":
 						addressA = GetAddress(cmds[1]);
 						string name = cmds[2];
-						if (variables.ContainsKey(name)) variables.Add(name, addressA);
-						variables[name] = addressA;
-						if (commentCode) bf += ";;Assigned memory address " + addressA + " the name '" + name + "'\n";
+						AssignVariable(name, addressA);
 						break;
 					case "dbg":
 						bf += "#";
@@ -293,10 +319,12 @@ namespace CEBrainfuckCreator
 				}
 				GoToMemoryAddress(instructionPointerAddress);
 				int instructionDiff = GetInstructionDiff(instructionCounter, nextInstruction, lines);
-				string instruction = bf + new string('+', instructionDiff);
+				string instruction = bf;
+				string instructionPointerIncrementer = new string('+', instructionDiff);
 				
 				bf = "";
-				bfReal += "-" + "[->+>+<<]>>[-<<+>>]<" + ">+<[>[-]<[-]]>[[-]<<" + instruction + ">>]<<";
+				if(seperateStateMachine) instruction = "\n\t\t" + instruction + "\n";
+				bfReal += "-" + "[->+>+<<]>>[-<<+>>]<" + ">+<[>[-]<[-]]>[[-]<<" + instruction + instructionPointerIncrementer + ">>]<<";
 				instructionCounter++;
 			}
 
@@ -392,6 +420,7 @@ namespace CEBrainfuckCreator
 						lines.RemoveAt(i);
 						lines.InsertRange(i, includeLines);
 						includedSmth = true;
+						Console.WriteLine(i);
 					}
 				}
 			}
@@ -426,13 +455,14 @@ namespace CEBrainfuckCreator
 				} else if(instructionDiff < 0 && nextInstruction != 0) {
 					instructionDiff = lines.Count - instructionCounter - instructionDiff - 1;
 				}
+				bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
 				return instructionDiff;
 		}
 
 		/////////////////////// Helper methods
 
 		/// <summary>
-		/// EXPERIMENTAL!!! DO NOT ALTER MEMORY WITH THIS METHOD. YOU WILL MOST LIKELY FUCK YOUR MEMORY UP
+		/// CAUTION!!! Make sure both your onTrue and onFalse brainfuck code end on the same memory address as they start
 		/// </summary>
 		public static void IF(int address, string onTrue, string onFalse)
 		{
@@ -614,6 +644,8 @@ namespace CEBrainfuckCreator
 				if (variables.ContainsKey(varName))
 				{
 					return variables[varName];
+				} else {
+					Error(currentLine, "Variable '" + varName + "' does not exist");
 				}
 				return 0;
 			}

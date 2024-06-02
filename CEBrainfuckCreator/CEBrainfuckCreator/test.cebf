@@ -1,7 +1,11 @@
-;; test
-macro test 2
-ous $0
-ous $1
-macroend
+#include standard.cebf
+#seperatestatemachine
+stn 1 1
+stn 1 2
+jmp/eq 1 2 success
+jmp end
+:success
+ous It's equal
 
-test Holy macaroi
+:end
+ous Done
