@@ -93,7 +93,7 @@ namespace CEBrainfuckCreator
 				}
 			}
 
-			// parse functions
+			// parse macros
 			bool inFunction = false;
 			string currentFunctionName = "";
 			string currentFunction = "";
@@ -155,6 +155,10 @@ namespace CEBrainfuckCreator
 						break;
 					case "jmp/nz":
 						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[1]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
+						nextInstruction = instructionCounter;
+						break;
+					case "jmp/ez":
+						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[1]), lines)));
 						nextInstruction = instructionCounter;
 						break;
 					case "sad":
