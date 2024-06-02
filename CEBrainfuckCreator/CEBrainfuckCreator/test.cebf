@@ -3,7 +3,7 @@
 sad 1 a
 sad 2 b
 set.n $a 1
-set.n $b 2
+set.n $b 1
 jmp.eq $a $b success
 jmp end
 :success
