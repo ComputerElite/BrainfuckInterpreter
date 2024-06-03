@@ -8,6 +8,7 @@ namespace CEBrainfuckCreator
 
 		public static string bf = "";
 		public static string bfReal = "";
+		public static int codeDepth = 0;
 		public static BrainfuckAddress currentMemoryAddress = new BrainfuckAddress();
 		public static int currentLine = 0;
 		public const int reservedMemoryLength = 15;
@@ -481,12 +482,14 @@ namespace CEBrainfuckCreator
 		/// </summary>
 		public static void IF(BrainfuckAddress address, string onTrue, string onFalse)
 		{
+			codeDepth++;
 			BrainfuckAddress startAddress = currentMemoryAddress;
 			BrainfuckAddress tmpValueAddress = GetBFCompilerMemoryAddress(0);
 			BrainfuckAddress tmpTrueAddress = GetBFCompilerMemoryAddress(1);
 
 			// store value
 			Copy(address, tmpValueAddress);
+			bf += "#";
 			
 			SetAddressValue(tmpTrueAddress, 1);
 			GoToMemoryAddressNew(tmpValueAddress); // compiler addresses don't need a back
@@ -503,6 +506,7 @@ namespace CEBrainfuckCreator
 			GoToMemoryAddressNew(tmpTrueAddress); // compiler addresses don't need a back
 			bf += "]<";
 			currentMemoryAddress = tmpValueAddress;
+			codeDepth--;
 		}
 
 		public static void OutputString(string s)
@@ -528,6 +532,7 @@ namespace CEBrainfuckCreator
 
 		public static void NANDGate(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress addressC)
 		{
+			codeDepth++;
 			StartMathOperation(addressA, addressB, addressC);
 			if (commentCode) AddCommentInNewLine("Perform XOR operation on " + GetRealAddress(addressA) + " and " + GetRealAddress(addressB) + " and store result in " + GetRealAddress(addressC) + " (AND Gate with inverted result)");
 			// And gate
@@ -538,27 +543,33 @@ namespace CEBrainfuckCreator
 			MoveValue(GetBFCompilerMemoryAddress(3), GetBFCompilerMemoryAddress(2));
 
 			EndMathOperation(addressA, addressB, addressC);
+			codeDepth--;
 		}
 		
 
 		public static void NOTGate(BrainfuckAddress addressA, BrainfuckAddress addressB)
 		{
+			codeDepth++;
 			StartMathOperation(addressA, addressB);
 			if (commentCode) AddCommentInNewLine("Perform NOT operation on " + GetRealAddress(addressA) + " and store result in " + GetRealAddress(addressB));
 			bf += ">[-]+<[>-<[-]]";
 			EndMathOperation(addressA, addressB);
+			codeDepth--;
 		}
 
 		public static void ANDGate(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress addressC)
 		{
+			codeDepth++;
 			StartMathOperation(addressA, addressB, addressC);
 			if (commentCode) AddCommentInNewLine("Perform AND operation on " + GetRealAddress(addressA) + " and " + GetRealAddress(addressB) + " and store result in " + GetRealAddress(addressC));
 			bf += "[->+<]++[->-<]>>[-]+<[>-<[-]]<";
 			EndMathOperation(addressA, addressB, addressC);
+			codeDepth--;
 		}
 
 		public static void XORGate(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress addressC)
 		{
+			codeDepth++;
 			// memory space compiler:
 			// 0: reserved for nand gate
 			// 1: reserved for nand gate
@@ -585,6 +596,7 @@ namespace CEBrainfuckCreator
 			ResetAddressValue(GetBFCompilerMemoryAddress(0));
 			ResetAddressValue(GetBFCompilerMemoryAddress(1));
 			ResetAddressValue(GetBFCompilerMemoryAddress(2));
+			codeDepth--;
 
 		}
 
@@ -596,10 +608,12 @@ namespace CEBrainfuckCreator
 
 		public static void ORGate(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress addressC)
 		{
+			codeDepth++;
 			StartMathOperation(addressA, addressB, addressC);
 			if (commentCode) AddCommentInNewLine("Perform OR operation on " + GetRealAddress(addressA) + " and " + GetRealAddress(addressB) + " and store result in " + GetRealAddress(addressC));
 			bf += "[->+<]>>[-]<[>+<[-]]<";
 			EndMathOperation(addressA, addressB, addressC);
+			codeDepth--;
 		}
 
 		public static void StartMathOperation(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress addressC)
@@ -691,17 +705,21 @@ namespace CEBrainfuckCreator
 
 		public static void ResetAddressValue(BrainfuckAddress address)
 		{
+			codeDepth++;
 			GoToMemoryAddressNew(address);
 			if (commentCode) AddCommentInNewLine("Set address value to 0");
 			bf += "[-]";
 			AfterGoToMemoryAddress(address);
+			codeDepth--;
 		}
 
 		public static void SetCurrentAddressValue(int value)
 		{
+			codeDepth++;
 			// set value;
 			if (commentCode) AddCommentInNewLine("Set address value to " + value);
 			bf += "[-]" + new string('+', value);
+			codeDepth--;
 		}
 		public static string GetAddressMoveNonPointer(BrainfuckAddress diff)
 		{
@@ -712,11 +730,12 @@ namespace CEBrainfuckCreator
 
 		public static void Copy(BrainfuckAddress addressA, BrainfuckAddress addressB)
 		{
+			codeDepth++;
+			if(commentCode) AddCommentInNewLine("Copying from " + addressA + " to " + addressB);
 			BrainfuckAddress tmpAddress = GetBFCompilerMemoryAddress(9);
-			ResetAddressValue(tmpAddress);
 			MoveValue(addressA, tmpAddress);
 			GoToMemoryAddressNew(tmpAddress); // compiler addresses don't need a back
-			if (commentCode) AddCommentInNewLine("Move value from address " + GetRealAddress(tmpAddress) + " into " + GetRealAddress(addressA) + " and " + GetRealAddress(addressB));
+			if (commentCode) AddCommentInNewLine("Move value from address " + tmpAddress + " into " + addressA + " and " + addressB);
 			bf += "[-";
 			GoToMemoryAddressNew(addressA);
 			bf += "+";
@@ -726,13 +745,15 @@ namespace CEBrainfuckCreator
 			AfterGoToMemoryAddress(addressB);
 			GoToMemoryAddressNew(tmpAddress); // compiler addresses don't need a back
 			bf += "]";
+			codeDepth--;
 		}
 
 		public static void MoveValue(BrainfuckAddress addressA, BrainfuckAddress addressB)
 		{
+			codeDepth++;
 			ResetAddressValue(addressB);
 			GoToMemoryAddressNew(addressA);
-			if (commentCode) AddCommentInNewLine("Move value from address " + GetRealAddress(addressA) + " into " + GetRealAddress(addressB));
+			if (commentCode) AddCommentInNewLine("Move value from address " + addressA + " into " + addressB);
 			bf += "[-";
 			AfterGoToMemoryAddress(addressA);
 			GoToMemoryAddressNew(addressB);
@@ -741,18 +762,22 @@ namespace CEBrainfuckCreator
 			GoToMemoryAddressNew(addressA);
 			bf += "]";
 			AfterGoToMemoryAddress(addressA);
+			codeDepth--;
 		}
 
 		public static void MultiplyAddresses(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress endAddress)
 		{
+			codeDepth++;
 			StartMathOperation(addressA, addressB, endAddress);
 			if (commentCode) AddCommentInNewLine("current address with next address and store result in the address after");
 			bf += "[>[->+>+<<]>>[-<<+>>]<<<-]";
 			EndMathOperation(addressA, addressB, endAddress);
+			codeDepth--;
 		}
 
 		public static void AddAddresses(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress endAddress)
 		{
+			codeDepth++;
 			BrainfuckAddress tmpAAddress = GetBFCompilerMemoryAddress(0);
 			BrainfuckAddress tmpBAddress = GetBFCompilerMemoryAddress(1);
 
@@ -766,10 +791,12 @@ namespace CEBrainfuckCreator
 			Copy(tmpBAddress, endAddress);
 			ResetAddressValue(tmpAAddress);
 			ResetAddressValue(tmpBAddress);
+			codeDepth--;
 		}
 
 		public static void SubstractAddresses(BrainfuckAddress addressA, BrainfuckAddress addressB, BrainfuckAddress endAddress)
 		{
+			codeDepth++;
 			BrainfuckAddress tmpAAddress = GetBFCompilerMemoryAddress(0);
 			BrainfuckAddress tmpBAddress = GetBFCompilerMemoryAddress(1);
 
@@ -783,6 +810,7 @@ namespace CEBrainfuckCreator
 			Copy(tmpBAddress, endAddress);
 			ResetAddressValue(tmpAAddress);
 			ResetAddressValue(tmpBAddress);
+			codeDepth--;
 		}
 
 		public static BrainfuckAddress GetBFCompilerMemoryAddress(int address)
@@ -793,10 +821,9 @@ namespace CEBrainfuckCreator
 
 		public static void GoToMemoryAddressNew(BrainfuckAddress address)
 		{
-
-			if (commentCode) AddCommentInNewLine("Move pointer from address " + GetRealAddress(currentMemoryAddress) + " to " + GetRealAddress(address));
+			codeDepth++;
+			if (commentCode) AddCommentInNewLine("Move pointer from " + currentMemoryAddress + " to " + address);
 			if(address.isPointer) {
-				
 				Copy(address.AsNonPointer(), GetBFCompilerMemoryAddress(15));
 				GoToMemoryAddressNew(GetBFCompilerMemoryAddress(15));
 				bf += "[[>>+<<-]+>>-]+>"; // follow pointer and leave a trace
@@ -804,6 +831,7 @@ namespace CEBrainfuckCreator
 				bf += GetAddressMoveNonPointer(currentMemoryAddress - address);
 				currentMemoryAddress.address = address.address;
 			}
+			codeDepth--;
 		}
 
 		public static void AfterGoToMemoryAddress(BrainfuckAddress address) {
@@ -814,7 +842,7 @@ namespace CEBrainfuckCreator
 		public static void AddCommentInNewLine(string comment)
 		{
 			if (!bf.EndsWith("\n")) bf += "\n";
-			bf += ";;   " + comment + "\n";
+			bf += ";;" + new string('\t', codeDepth) + comment + "\n";
 		}
 	}
 
@@ -857,7 +885,7 @@ namespace CEBrainfuckCreator
 
         public override string ToString()
         {
-            return "@" + (isPointer ? "*" : "") + address;
+            return "@" + (isPointer ? "*" : "") + address + " (real: " + Program.GetRealAddress(this) + ")";
         }
     }
 
