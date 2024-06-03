@@ -99,7 +99,7 @@ namespace CEBrainfuckCreator
 			// 15: pointer
 
 			BrainfuckAddress instructionPointerAddress = GetBFCompilerMemoryAddress(10);
-			bfReal = "timeout:200\n";
+			bfReal = "timeout:1000\n";
 			// reserve first 10 memory addresses for variables of the compiler
 			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
 			
@@ -176,12 +176,11 @@ namespace CEBrainfuckCreator
 						nextInstruction = GetInstruction(cmds[1]);
 						break;
 					case "jmp.nz":
-						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]), lines)), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)));
+						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]))), new string('+', GetInstructionDiff(instructionCounter, nextInstruction)));
 						nextInstruction = instructionCounter;
 						break;
 					case "jmp.ez":
-						Console.WriteLine(String.Join(' ', cmds));
-						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, nextInstruction, lines)), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]), lines)));
+						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, nextInstruction)), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]))));
 						nextInstruction = instructionCounter;
 						break;
 					case "sad":
@@ -216,7 +215,7 @@ namespace CEBrainfuckCreator
 					case "inc":
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddressNew(addressA);
-						bf += "+";
+						bf += "++";
 						AfterGoToMemoryAddress(addressA);
 						break;
 					case "set.a":
@@ -329,7 +328,7 @@ namespace CEBrainfuckCreator
 						break;
 				}
 				GoToMemoryAddressNew(instructionPointerAddress); // we can ignore going back as the instruction pointer itself isn't considered a pointer in my definition of a pointer as an memory address
-				int instructionDiff = GetInstructionDiff(instructionCounter, nextInstruction, lines);
+				int instructionDiff = GetInstructionDiff(instructionCounter, nextInstruction);
 				string instruction = bf;
 				string instructionPointerIncrementer = new string('+', instructionDiff);
 				
@@ -464,15 +463,15 @@ namespace CEBrainfuckCreator
 			return ConvertToInt(instruction);
 		}
 
-		public static int GetInstructionDiff(int instructionCounter, int nextInstruction, List<string> lines) {
-				int instructionDiff = nextInstruction - instructionCounter;
-				if(nextInstruction == 0) {
-					instructionDiff = 0;
-				} else if(instructionDiff < 0 && nextInstruction != 0) {
-					instructionDiff = lines.Count - instructionCounter - instructionDiff - 1;
-				}
-				if(commentCode) bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
-				return instructionDiff;
+		public static int GetInstructionDiff(int instructionCounter, int nextInstruction) {
+			int instructionDiff = nextInstruction - instructionCounter;
+			if(nextInstruction == 0) {
+				instructionDiff = 0;
+			} else if(instructionDiff < 0 && nextInstruction != 0) {
+				instructionDiff = lines.Count - instructionCounter + nextInstruction;
+			}
+			if(commentCode) bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
+			return instructionDiff;
 		}
 
 		/////////////////////// Helper methods
@@ -483,18 +482,20 @@ namespace CEBrainfuckCreator
 		public static void IF(BrainfuckAddress address, string onTrue, string onFalse)
 		{
 			codeDepth++;
-			BrainfuckAddress startAddress = currentMemoryAddress;
+			if(commentCode) AddCommentInNewLine("Doing if for " + address);
+			BrainfuckAddress startAddress = currentMemoryAddress.Clone();
 			BrainfuckAddress tmpValueAddress = GetBFCompilerMemoryAddress(0);
 			BrainfuckAddress tmpTrueAddress = GetBFCompilerMemoryAddress(1);
 
 			// store value
 			Copy(address, tmpValueAddress);
 			bf += "#";
-			
+			codeDepth--;
+			return;
 			SetAddressValue(tmpTrueAddress, 1);
 			GoToMemoryAddressNew(tmpValueAddress); // compiler addresses don't need a back
 			bf += "[[-]>[-]";
-			currentMemoryAddress = tmpTrueAddress;
+			currentMemoryAddress = tmpTrueAddress.Clone();
 			GoToMemoryAddressNew(startAddress);
 			bf += onTrue;
 			AfterGoToMemoryAddress(startAddress);
@@ -505,7 +506,7 @@ namespace CEBrainfuckCreator
 			AfterGoToMemoryAddress(startAddress);
 			GoToMemoryAddressNew(tmpTrueAddress); // compiler addresses don't need a back
 			bf += "]<";
-			currentMemoryAddress = tmpValueAddress;
+			currentMemoryAddress = tmpValueAddress.Clone();
 			codeDepth--;
 		}
 
@@ -693,7 +694,7 @@ namespace CEBrainfuckCreator
 		}
 
 		public static int ProgramAddressToCompiledAddress(int address) {
-			return address * 2 + 1;
+			return address * 2;
 		}
 
 		public static void SetAddressValue(BrainfuckAddress address, int value)
@@ -735,7 +736,7 @@ namespace CEBrainfuckCreator
 			BrainfuckAddress tmpAddress = GetBFCompilerMemoryAddress(9);
 			MoveValue(addressA, tmpAddress);
 			GoToMemoryAddressNew(tmpAddress); // compiler addresses don't need a back
-			if (commentCode) AddCommentInNewLine("Move value from address " + tmpAddress + " into " + addressA + " and " + addressB);
+			if (commentCode) AddCommentInNewLine("Multi-move value from address " + tmpAddress + " into " + addressA + " and " + addressB);
 			bf += "[-";
 			GoToMemoryAddressNew(addressA);
 			bf += "+";
@@ -816,7 +817,7 @@ namespace CEBrainfuckCreator
 		public static BrainfuckAddress GetBFCompilerMemoryAddress(int address)
 		{
 			
-			return new BrainfuckAddress(-reservedMemoryLength + address);
+			return new BrainfuckAddress(-reservedMemoryLength + address, true);
 		}
 
 		public static void GoToMemoryAddressNew(BrainfuckAddress address)
@@ -826,7 +827,8 @@ namespace CEBrainfuckCreator
 			if(address.isPointer) {
 				Copy(address.AsNonPointer(), GetBFCompilerMemoryAddress(15));
 				GoToMemoryAddressNew(GetBFCompilerMemoryAddress(15));
-				bf += "[[>>+<<-]+>>-]+>"; // follow pointer and leave a trace
+				if(commentCode) AddCommentInNewLine("Follow pointer and leaving a trace");
+				bf += "[>>[-]<<[>>+<<-]+>>-]+>"; // follow pointer and leave a trace
 			} else {
 				bf += GetAddressMoveNonPointer(currentMemoryAddress - address);
 				currentMemoryAddress.address = address.address;
@@ -835,14 +837,16 @@ namespace CEBrainfuckCreator
 		}
 
 		public static void AfterGoToMemoryAddress(BrainfuckAddress address) {
-
-			if(address.isPointer) bf += "<[-<<]>>"; // follow trace back
+			if(address.isPointer) {
+				if(commentCode) AddCommentInNewLine("tracing back from pointer");
+				bf += "<[-<<]>>"; // follow trace back
+			}
 		}
 
 		public static void AddCommentInNewLine(string comment)
 		{
 			if (!bf.EndsWith("\n")) bf += "\n";
-			bf += ";;" + new string('\t', codeDepth) + comment + "\n";
+			bf += ";;" + new string('\t', codeDepth) + SanitizeComment(comment) + "\n";
 		}
 	}
 
@@ -851,19 +855,29 @@ namespace CEBrainfuckCreator
 		// for variables
 		public int programAddress {get;set;} = 0;
 		public bool isPointer {get;set;} = false;
+		public bool isCompilerAddress {get;set;} = false;
 
 		public BrainfuckAddress AsNonPointer() {
 			return new BrainfuckAddress(address);
 		}
 
+		public BrainfuckAddress Clone() {
+			return new BrainfuckAddress {
+				address = this.address,
+				programAddress = this.programAddress,
+				isPointer = this.isPointer,
+				isCompilerAddress = this.isCompilerAddress
+			};
+		}
 
 		public void IncrementProgram() {
 			address += 2;
 		}
 
 		public BrainfuckAddress() {}
-		public BrainfuckAddress(int address) {
+		public BrainfuckAddress(int address, bool isCompilerAddress = false) {
 			this.address = address;
+			this.isCompilerAddress = isCompilerAddress;
 		}
 
 		public BrainfuckAddress(int address, int programAddress) {
@@ -885,7 +899,7 @@ namespace CEBrainfuckCreator
 
         public override string ToString()
         {
-            return "@" + (isPointer ? "*" : "") + address + " (real: " + Program.GetRealAddress(this) + ")";
+            return "@" + (isPointer ? "*" : "") + address + " (real: " + Program.GetRealAddress(this) + (isCompilerAddress ? "; compiler": "") + ")";
         }
     }
 
