@@ -10,7 +10,7 @@ namespace CEBrainfuckCreator
 		public static string bfReal = "";
 		public static BrainfuckAddress currentMemoryAddress = new BrainfuckAddress();
 		public static int currentLine = 0;
-		public const int reservedMemoryLength = 15;
+		public const int reservedMemoryLength = 16;
 		public static Dictionary<string, BrainfuckAddress> variables = new Dictionary<string, BrainfuckAddress>();
 
 		// compiler options
