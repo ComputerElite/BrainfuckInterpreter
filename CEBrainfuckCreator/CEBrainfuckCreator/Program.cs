@@ -44,6 +44,9 @@ namespace CEBrainfuckCreator
 		public static List<string> lines = new List<string>();
 
 		private static void AddPredefinedVariables() {
+			tmpAddresses.Add(GetBFCompilerMemoryAddress(15));
+			tmpAddresses.Add(GetBFCompilerMemoryAddress(16));
+			tmpAddresses.Add(GetBFCompilerMemoryAddress(17));
 			for(int i = 0; i < reservedMemoryLength; i++) {
 				AssignVariable("cebf_compiler_" + i, GetBFCompilerMemoryAddress(i));
 			}
@@ -832,9 +835,6 @@ namespace CEBrainfuckCreator
 		}
 
 		public static List<BrainfuckAddress> tmpAddresses = new List<BrainfuckAddress> {
-			new BrainfuckAddress(15, "cebf_compiler_15", true),
-			new BrainfuckAddress(16, "cebf_compiler_16", true),
-			new BrainfuckAddress(17, "cebf_compiler_17", true)
 		};
 		public static BrainfuckAddress GetUnusedTmpAddress() {
 			if(tmpAddresses.Count <= 0) {

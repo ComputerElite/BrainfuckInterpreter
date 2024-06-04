@@ -101,30 +101,30 @@ timeout:1000
 >>>>>>>>>>
 ;;			Set address value to 0
 [-]
-;;					Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>
+;;					Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<
 ;;				Set address value to 0
 [-]
-;;				Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<
-;;			Move value from address @0 (real: 21) into cebf_compiler_15@15 (real: 36; compiler)
+;;				Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>
+;;			Move value from address @0 (real: 21) into cebf_compiler_15@💩6 (real: 15; compiler)
 [-
-;;				Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>+
-;;				Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<]
-;;			Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>
-;;		Multi💩move value from address cebf_compiler_15@15 (real: 36; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
+;;				Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<+
+;;				Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>]
+;;			Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<
+;;		Multi💩move value from address cebf_compiler_15@💩6 (real: 15; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
 [-
-;;			Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<+
+;;			Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>+
 ;;			Move pointer from @0 (real: 21) to cebf_compiler_20@💩1 (real: 20; compiler)
 <+
-;;			Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>]
-;;		Move pointer from @15 (real: 36) to cebf_compiler_20@💩1 (real: 20; compiler)
-<<<<<<<<<<<<<<<<
+;;			Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<]
+;;		Move pointer from @💩6 (real: 15) to cebf_compiler_20@💩1 (real: 20; compiler)
+>>>>>
 ;;	Follow pointer and leaving a trace
 [>>[-]<<[>>+<<-]+>>-]+>.
 ;;tracing back from pointer
@@ -153,126 +153,126 @@ timeout:1000
 >>>
 ;;			Set address value to 0
 [-]
-;;					Move pointer from @💩8 (real: 13) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>>>>>>>>
+;;					Move pointer from @💩8 (real: 13) to cebf_compiler_15@💩6 (real: 15; compiler)
+>>
 ;;				Set address value to 0
 [-]
-;;				Move pointer from @15 (real: 36) to @*0 (real: 21)
+;;				Move pointer from @💩6 (real: 15) to @*0 (real: 21)
 ;;					Copying from @0 (real: 21) to cebf_compiler_20@💩1 (real: 20; compiler)
-;;							Move pointer from @15 (real: 36) to cebf_compiler_20@💩1 (real: 20; compiler)
-<<<<<<<<<<<<<<<<
+;;							Move pointer from @💩6 (real: 15) to cebf_compiler_20@💩1 (real: 20; compiler)
+>>>>>
 ;;						Set address value to 0
 [-]
-;;								Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>
+;;								Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<
 ;;							Set address value to 0
 [-]
-;;							Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<
-;;						Move value from address @0 (real: 21) into cebf_compiler_15@15 (real: 36; compiler)
+;;							Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>
+;;						Move value from address @0 (real: 21) into cebf_compiler_15@💩6 (real: 15; compiler)
 [-
-;;							Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>+
-;;							Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<]
-;;						Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>
-;;					Multi💩move value from address cebf_compiler_15@15 (real: 36; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
+;;							Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<+
+;;							Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>]
+;;						Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<
+;;					Multi💩move value from address cebf_compiler_15@💩6 (real: 15; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
 [-
-;;						Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<+
+;;						Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>+
 ;;						Move pointer from @0 (real: 21) to cebf_compiler_20@💩1 (real: 20; compiler)
 <+
-;;						Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>]
-;;					Move pointer from @15 (real: 36) to cebf_compiler_20@💩1 (real: 20; compiler)
-<<<<<<<<<<<<<<<<
+;;						Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<]
+;;					Move pointer from @💩6 (real: 15) to cebf_compiler_20@💩1 (real: 20; compiler)
+>>>>>
 ;;				Follow pointer and leaving a trace
 [>>[-]<<[>>+<<-]+>>-]+>
-;;			Move value from address @*0 (real: 21) into cebf_compiler_15@15 (real: 36; compiler)
+;;			Move value from address @*0 (real: 21) into cebf_compiler_15@💩6 (real: 15; compiler)
 [-
 ;;			tracing back from pointer
 <[-<<]>>
-;;				Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>+
-;;				Move pointer from @15 (real: 36) to @*0 (real: 21)
+;;				Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<+
+;;				Move pointer from @💩6 (real: 15) to @*0 (real: 21)
 ;;					Copying from @0 (real: 21) to cebf_compiler_20@💩1 (real: 20; compiler)
-;;							Move pointer from @15 (real: 36) to cebf_compiler_20@💩1 (real: 20; compiler)
-<<<<<<<<<<<<<<<<
+;;							Move pointer from @💩6 (real: 15) to cebf_compiler_20@💩1 (real: 20; compiler)
+>>>>>
 ;;						Set address value to 0
 [-]
-;;								Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>
+;;								Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<
 ;;							Set address value to 0
 [-]
-;;							Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<
-;;						Move value from address @0 (real: 21) into cebf_compiler_15@15 (real: 36; compiler)
+;;							Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>
+;;						Move value from address @0 (real: 21) into cebf_compiler_15@💩6 (real: 15; compiler)
 [-
-;;							Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>+
-;;							Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<]
-;;						Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>
-;;					Multi💩move value from address cebf_compiler_15@15 (real: 36; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
+;;							Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<+
+;;							Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>]
+;;						Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<
+;;					Multi💩move value from address cebf_compiler_15@💩6 (real: 15; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
 [-
-;;						Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<+
+;;						Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>+
 ;;						Move pointer from @0 (real: 21) to cebf_compiler_20@💩1 (real: 20; compiler)
 <+
-;;						Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>]
-;;					Move pointer from @15 (real: 36) to cebf_compiler_20@💩1 (real: 20; compiler)
-<<<<<<<<<<<<<<<<
+;;						Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<]
+;;					Move pointer from @💩6 (real: 15) to cebf_compiler_20@💩1 (real: 20; compiler)
+>>>>>
 ;;				Follow pointer and leaving a trace
 [>>[-]<<[>>+<<-]+>>-]+>]
 ;;			tracing back from pointer
 <[-<<]>>
-;;			Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>
-;;		Multi💩move value from address cebf_compiler_15@15 (real: 36; compiler) into @*0 (real: 21) and cebf_compiler_13@💩8 (real: 13; compiler)
+;;			Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<
+;;		Multi💩move value from address cebf_compiler_15@💩6 (real: 15; compiler) into @*0 (real: 21) and cebf_compiler_13@💩8 (real: 13; compiler)
 [-
-;;			Move pointer from @15 (real: 36) to @*0 (real: 21)
+;;			Move pointer from @💩6 (real: 15) to @*0 (real: 21)
 ;;				Copying from @0 (real: 21) to cebf_compiler_20@💩1 (real: 20; compiler)
-;;						Move pointer from @15 (real: 36) to cebf_compiler_20@💩1 (real: 20; compiler)
-<<<<<<<<<<<<<<<<
+;;						Move pointer from @💩6 (real: 15) to cebf_compiler_20@💩1 (real: 20; compiler)
+>>>>>
 ;;					Set address value to 0
 [-]
-;;							Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>
+;;							Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<
 ;;						Set address value to 0
 [-]
-;;						Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<
-;;					Move value from address @0 (real: 21) into cebf_compiler_15@15 (real: 36; compiler)
+;;						Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>
+;;					Move value from address @0 (real: 21) into cebf_compiler_15@💩6 (real: 15; compiler)
 [-
-;;						Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>+
-;;						Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<]
-;;					Move pointer from @0 (real: 21) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>
-;;				Multi💩move value from address cebf_compiler_15@15 (real: 36; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
+;;						Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<+
+;;						Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>]
+;;					Move pointer from @0 (real: 21) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<<
+;;				Multi💩move value from address cebf_compiler_15@💩6 (real: 15; compiler) into @0 (real: 21) and cebf_compiler_20@💩1 (real: 20; compiler)
 [-
-;;					Move pointer from @15 (real: 36) to @0 (real: 21)
-<<<<<<<<<<<<<<<+
+;;					Move pointer from @💩6 (real: 15) to @0 (real: 21)
+>>>>>>+
 ;;					Move pointer from @0 (real: 21) to cebf_compiler_20@💩1 (real: 20; compiler)
 <+
-;;					Move pointer from @💩1 (real: 20) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>]
-;;				Move pointer from @15 (real: 36) to cebf_compiler_20@💩1 (real: 20; compiler)
-<<<<<<<<<<<<<<<<
+;;					Move pointer from @💩1 (real: 20) to cebf_compiler_15@💩6 (real: 15; compiler)
+<<<<<]
+;;				Move pointer from @💩6 (real: 15) to cebf_compiler_20@💩1 (real: 20; compiler)
+>>>>>
 ;;			Follow pointer and leaving a trace
 [>>[-]<<[>>+<<-]+>>-]+>+
 ;;		tracing back from pointer
 <[-<<]>>
 ;;			Move pointer from @💩1 (real: 20) to cebf_compiler_13@💩8 (real: 13; compiler)
 <<<<<<<+
-;;			Move pointer from @💩8 (real: 13) to cebf_compiler_15@15 (real: 36; compiler)
->>>>>>>>>>>>>>>>>>>>>>>]#
-;;		Move pointer from @15 (real: 36) to cebf_compiler_14@💩7 (real: 14; compiler)
-<<<<<<<<<<<<<<<<<<<<<<
+;;			Move pointer from @💩8 (real: 13) to cebf_compiler_15@💩6 (real: 15; compiler)
+>>]#
+;;		Move pointer from @💩6 (real: 15) to cebf_compiler_14@💩7 (real: 14; compiler)
+<
 ;;		Set address value to 1
 [-]+
 ;;		Move pointer from @💩7 (real: 14) to cebf_compiler_13@💩8 (real: 13; compiler)
