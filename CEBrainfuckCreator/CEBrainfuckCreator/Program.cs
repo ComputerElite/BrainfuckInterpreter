@@ -11,7 +11,7 @@ namespace CEBrainfuckCreator
 		public static int codeDepth = 0;
 		public static BrainfuckAddress currentMemoryAddress = new BrainfuckAddress();
 		public static int currentLine = 0;
-		public const int reservedMemoryLength = 21;
+		public const int reservedMemoryLength = 24;
 		public static Dictionary<string, BrainfuckAddress> variables = new Dictionary<string, BrainfuckAddress>();
 
 		// compiler options
@@ -44,11 +44,15 @@ namespace CEBrainfuckCreator
 		public static List<string> lines = new List<string>();
 
 		private static void AddPredefinedVariables() {
-			tmpAddresses.Add(GetBFCompilerMemoryAddress(15));
-			tmpAddresses.Add(GetBFCompilerMemoryAddress(16));
-			tmpAddresses.Add(GetBFCompilerMemoryAddress(17));
+			foreach(int addressInt in tmpAddressesInt) {
+				tmpAddresses.Add(GetBFCompilerMemoryAddress(addressInt));
+			}
+
 			for(int i = 0; i < reservedMemoryLength; i++) {
 				AssignVariable("cebf_compiler_" + i, GetBFCompilerMemoryAddress(i));
+			}
+			for(int i = 0; i < standardLibraryAddressesInt.Count; i++) {
+				AssignVariable("cebf_stdlib_" + i, GetBFCompilerMemoryAddress(standardLibraryAddressesInt[i]));
 			}
 		}
 
@@ -70,6 +74,13 @@ namespace CEBrainfuckCreator
 				}
 			}
 		}
+
+		public const int instructionPointerAddressInt = 10;
+		public const int ifValueAddressInt = 13;
+		public const int ifTrueAddressInt = 14;
+		public static List<int> tmpAddressesInt = new List<int> {15,16,17,18,19,20};
+		public const int pointerAddressInt = 23;
+		public static List<int> standardLibraryAddressesInt = new List<int> {7,8,9, 22};
 
 		public static void Generate(string file = "test.cebf")
 		{
@@ -93,7 +104,7 @@ namespace CEBrainfuckCreator
 			// 6: logic gates tmp (XOR)
 			// 7: Standard library reserved
 			// 8: Standard library reserved
-			// 9: 
+			// 9: Standard library reserved
 			// 10: instruction pointer
 			// 11: instruction pointer copy
 			// 12: instruction pointer check
@@ -102,11 +113,14 @@ namespace CEBrainfuckCreator
 			// 15: tmp1
 			// 16: tmp2
 			// 17: tmp3
-			// 18: pointer reserved (must always be 0)
-			// 19: 
-			// 20: pointer
+			// 18: tmp4
+			// 19: tmp5
+			// 20: tmp6
+			// 21: pointer reserved (must always be 0)
+			// 22: Standard library reserved
+			// 23: pointer
 
-			BrainfuckAddress instructionPointerAddress = GetBFCompilerMemoryAddress(10);
+			BrainfuckAddress instructionPointerAddress = GetBFCompilerMemoryAddress(instructionPointerAddressInt);
 			bfReal = "timeout:1000\n";
 			// reserve first 10 memory addresses for variables of the compiler
 			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
@@ -450,18 +464,24 @@ namespace CEBrainfuckCreator
 		}
 
 		public static void ExpandAllMacros() {
-			string expandedCode = "";
-			for(int i = 0; i < lines.Count; i++) {
-				List<string> cmds = lines[i].Split(' ').ToList();
-				string macroName = cmds[0];
-				cmds.RemoveAt(0);
-				if(cmds.Count <= 0 || !macros.ContainsKey(macroName)) {
-					expandedCode += lines[i] + "\n";
-					continue;
+			bool expandedMacro = true;
+			while(expandedMacro) {
+				expandedMacro = false;
+				string expandedCode = "";
+				for(int i = 0; i < lines.Count; i++) {
+					List<string> cmds = lines[i].Split(' ').ToList();
+					string macroName = cmds[0];
+					cmds.RemoveAt(0);
+					if(cmds.Count <= 0 || !macros.ContainsKey(macroName)) {
+						expandedCode += lines[i] + "\n";
+						continue;
+					}
+					expandedMacro = true;
+					expandedCode += (commentCode ? ";; entering macro " + macroName + "\n" : "") + macros[macroName].Expand(i, cmds) + "\n" + (commentCode ? ";; exiting macro " + macroName + "\n" : "");
 				}
-				expandedCode += (commentCode ? ";; entering macro " + macroName + "\n" : "") + macros[macroName].Expand(i, cmds) + "\n" + (commentCode ? ";; exiting macro " + macroName + "\n" : "");
+				lines = expandedCode.Split('\n').ToList();
 			}
-			lines = expandedCode.Split('\n').ToList();
+			
 		}
 
 		public static int GetInstruction(string instruction) {
@@ -492,12 +512,11 @@ namespace CEBrainfuckCreator
 			codeDepth++;
 			if(commentCode) AddCommentInNewLine("Doing if for " + address);
 			BrainfuckAddress startAddress = currentMemoryAddress.Clone();
-			BrainfuckAddress tmpValueAddress = GetBFCompilerMemoryAddress(13);
-			BrainfuckAddress tmpTrueAddress = GetBFCompilerMemoryAddress(14);
+			BrainfuckAddress tmpValueAddress = GetBFCompilerMemoryAddress(ifValueAddressInt);
+			BrainfuckAddress tmpTrueAddress = GetBFCompilerMemoryAddress(ifTrueAddressInt);
 
 			// store value
 			Copy(address, tmpValueAddress);
-			bf += "#";
 			//codeDepth--;
 			//return;
 			SetAddressValue(tmpTrueAddress, 1);
@@ -853,8 +872,8 @@ namespace CEBrainfuckCreator
 			codeDepth++;
 			if (commentCode) AddCommentInNewLine("Move pointer from " + currentMemoryAddress + " to " + address);
 			if(address.isPointer) {
-				Copy(address.AsNonPointer(), GetBFCompilerMemoryAddress(20));
-				GoToMemoryAddressNew(GetBFCompilerMemoryAddress(20));
+				Copy(address.AsNonPointer(), GetBFCompilerMemoryAddress(pointerAddressInt));
+				GoToMemoryAddressNew(GetBFCompilerMemoryAddress(pointerAddressInt));
 				if(commentCode) AddCommentInNewLine("Follow pointer and leaving a trace");
 				bf += "[>>[-]<<[>>+<<-]+>>-]+>"; // follow pointer and leave a trace
 			} else {
