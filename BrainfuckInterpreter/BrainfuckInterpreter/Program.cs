@@ -1,4 +1,4 @@
-﻿xusing System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace BrainFuck
@@ -50,6 +50,7 @@ namespace BrainFuck
                     brainfuck += input;
                 }
             }
+            brainfuck = brainfuck.Replace("\t", "");
             Console.Clear();
             Console.SetCursorPosition(0, 0);
             Console.WriteLine(brainfuck);

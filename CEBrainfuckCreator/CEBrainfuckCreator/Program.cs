@@ -830,7 +830,6 @@ namespace CEBrainfuckCreator
 
 		public static BrainfuckAddress GetBFCompilerMemoryAddress(int address)
 		{
-			
 			return new BrainfuckAddress(-reservedMemoryLength + address, "cebf_compiler_" + address, true);
 		}
 
@@ -840,7 +839,9 @@ namespace CEBrainfuckCreator
 			if(tmpAddresses.Count <= 0) {
 				throw new Exception("No tmp compiler addresses free anymore");
 			}
-			return tmpAddresses[0];
+			BrainfuckAddress addressToReturn = tmpAddresses[0];
+			tmpAddresses.RemoveAt(0);
+			return addressToReturn;
 		}
 
 		public static void FreeTmpAddress(BrainfuckAddress address) {

@@ -1,9 +1,9 @@
-#commentcode
+;;#commentcode
 #seperatestatemachine
 sad 0 pointer
 sad 1 a
 sad 3 value
-set.s $value abcd
+set.s $value ABCD
 set.n $a 1
 set.a $pointer $value
 :loop

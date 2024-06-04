@@ -17,7 +17,16 @@ namespace CEBrainFuck
 			{
 				if (Console.WindowWidth < (i + 1) * 4) Console.SetCursorPosition(0, Console.CursorTop + 1);
 				Console.SetCursorPosition(i * 4, Console.CursorTop);
-				Console.Write("|" + ((int)memory[memStart + i]).ToString().PadRight(3));
+				int memAddr = memStart + i;
+				Console.Write("|");
+				if(memAddr == 20) {
+					Console.ForegroundColor = ConsoleColor.Red;
+				} else if(memAddr > 20 && memAddr % 2 == 0) {
+					Console.ForegroundColor = ConsoleColor.DarkYellow;
+				} else {
+					Console.ForegroundColor = ConsoleColor.White;
+				}
+				Console.Write(((int)memory[memAddr]).ToString().PadRight(3));
 				Console.SetCursorPosition((i * 4 + 2) % Console.WindowWidth, Console.CursorTop + 1);
 				if (i + memStart == pointer)
 				{
@@ -28,7 +37,8 @@ namespace CEBrainFuck
 					Console.Write("  ");
 				}
 				Console.SetCursorPosition((i * 4 + 1) % Console.WindowWidth, Console.CursorTop + 1);
-				Console.Write((memStart + i).ToString());
+				Console.Write(memAddr.ToString());
+				Console.ForegroundColor = ConsoleColor.White;
 				Console.SetCursorPosition(i * 4, Console.CursorTop - 2);
 			}
 		}
@@ -56,6 +66,7 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 					brainfuck += input;
 				}
 			}
+			brainfuck = brainfuck.Replace("\t", "");
 			Console.Clear();
 			Console.SetCursorPosition(0, 0);
 			Console.WriteLine(brainfuck);
