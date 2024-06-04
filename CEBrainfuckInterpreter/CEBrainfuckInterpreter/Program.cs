@@ -32,6 +32,9 @@ namespace CEBrainFuck
 				Console.SetCursorPosition(i * 4, Console.CursorTop - 2);
 			}
 		}
+
+static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
+
 		static void Main(string[] args)
 		{
 			string brainfuck = "";
@@ -78,7 +81,7 @@ namespace CEBrainFuck
 
 					Console.WriteLine(new String(' ', programPosition - startPos) + "^");
 					Display();
-					Console.ReadKey();
+					if(validBf.Contains(brainfuck[programPosition])) Console.ReadKey();
 				}
 
 				if (lastLoopOpen.Count >= 1 && lastLoopOpen[0] == -1 && brainfuck[programPosition] != ']' && brainfuck[programPosition] != '[')

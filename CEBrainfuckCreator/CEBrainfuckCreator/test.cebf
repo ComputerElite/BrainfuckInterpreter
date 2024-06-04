@@ -6,8 +6,8 @@ sad 3 value
 set.s $value abcd
 set.n $a 1
 set.a $pointer $value
-
 :loop
 out.r *$pointer
-add $a $pointer $pointer
+inc $pointer
+
 jmp.nz *$pointer loop
