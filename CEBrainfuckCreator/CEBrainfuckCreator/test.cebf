@@ -2,20 +2,19 @@
 #seperatestatemachine
 #include standard.cebf
 
-sad 5 str0
-sad 10 str1
-set.s $str0 Test
-set.s $str1 Test
+sad 2 input
+sad 0 input_pointer
+sad 1 new_line
 
-string.compare $str0 $str1 same
-jmp notsame
+;; readline
+set.a $input_pointer $input
+set.n $new_line 10
+:input_loop
+in.c *$input_pointer
+jmp.eq *$input_pointer $new_line done
+inc $input_pointer 
+jmp input_loop
 
-:notsame
-wrt.s They're not the same
-jmp end
-
-:same
-wrt.s They're the same
-jmp end
-
-:end
+:done
+out.s $input
+wrt.s lol

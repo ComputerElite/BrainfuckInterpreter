@@ -211,7 +211,7 @@ namespace CEBrainfuckCreator
 						cmds.RemoveAt(1);
 						bf += String.Join(' ', cmds);
 						AfterGoToMemoryAddress(addressA);
-						// ToDo
+						break;
 					case "jmp":
 						nextInstruction = GetInstruction(cmds[1]);
 						break;
