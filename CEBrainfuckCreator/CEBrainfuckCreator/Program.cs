@@ -204,6 +204,14 @@ namespace CEBrainfuckCreator
 
 				switch (cmd)
 				{
+					case "raw":
+						addressA = GetAddress(cmds[1]);
+						GoToMemoryAddressNew(addressA);
+						cmds.RemoveAt(0);
+						cmds.RemoveAt(1);
+						bf += String.Join(' ', cmds);
+						AfterGoToMemoryAddress(addressA);
+						// ToDo
 					case "jmp":
 						nextInstruction = GetInstruction(cmds[1]);
 						break;

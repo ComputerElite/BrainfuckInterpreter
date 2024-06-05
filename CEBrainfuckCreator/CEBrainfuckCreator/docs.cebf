@@ -19,6 +19,7 @@
 ;; jmp.nz <address> <label>                     jumps to a label if address is not zero
 ;; jmp.ez <address> <label>                     jumps to a label if address is zero
 ;; inc <address>                                increments address
+;; raw <startAddress> <brainfuck code>                         Embeds raw brainfuck code into the compiled code (dangerous).
 ;;
 ;; __GATES__
 ;; and <addressA> <addressB> <addressC>     AND gate    if a and b then c is 1

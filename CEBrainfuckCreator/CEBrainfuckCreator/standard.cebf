@@ -4,7 +4,6 @@
 ;; The standard library contains macros which are useful for writing programs in cebf.
 ;; The compiler automatically reserves space for the standard library and you won't have to worry about overwriting any of it's variables when using it.
 
-
 ;; jump if equal
 ;; jmp.eq <addressA> <addressB> <label>
 macro jmp.eq 3
