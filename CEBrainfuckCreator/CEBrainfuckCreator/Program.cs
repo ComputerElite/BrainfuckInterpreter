@@ -110,12 +110,12 @@ namespace CEBrainfuckCreator
 			// 12: instruction pointer check
 			// 13: if value
 			// 14: if true
-			// 15: tmp1
-			// 16: tmp2
-			// 17: tmp3
-			// 18: tmp4
-			// 19: tmp5
-			// 20: tmp6
+			// 15: compiler tmp1
+			// 16: compiler tmp2
+			// 17: compiler tmp3
+			// 18: compiler tmp4
+			// 19: compiler tmp5
+			// 20: compiler tmp6
 			// 21: standard library reserved
 			// 22: standard library reserved
 			// 23: standard library reserved
