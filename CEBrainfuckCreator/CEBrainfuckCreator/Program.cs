@@ -79,8 +79,8 @@ namespace CEBrainfuckCreator
 		public const int ifValueAddressInt = 13;
 		public const int ifTrueAddressInt = 14;
 		public static List<int> tmpAddressesInt = new List<int> {15,16,17,18,19,20};
-		public const int pointerAddressInt = 23;
-		public static List<int> standardLibraryAddressesInt = new List<int> {7,8,9, 22};
+		public const int pointerAddressInt = 33;
+		public static List<int> standardLibraryAddressesInt = new List<int> {7, 8, 9, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32};
 
 		public static void Generate(string file = "test.cebf")
 		{
@@ -94,7 +94,7 @@ namespace CEBrainfuckCreator
 			int instructionCounter = 1;
 
 
-			// Reserved memory addresses
+			// Compiler memory layout
 			// 0: math a
 			// 1: math b
 			// 2: math result
@@ -116,9 +116,19 @@ namespace CEBrainfuckCreator
 			// 18: tmp4
 			// 19: tmp5
 			// 20: tmp6
-			// 21: pointer reserved (must always be 0)
-			// 22: Standard library reserved
-			// 23: pointer
+			// 21: standard library reserved
+			// 22: standard library reserved
+			// 23: standard library reserved
+			// 24: standard library reserved
+			// 25: standard library reserved
+			// 26: standard library reserved
+			// 27: standard library reserved
+			// 28: standard library reserved
+			// 29: standard library reserved
+			// 30: standard library reserved
+			// 31: pointer reserved (must always be 0)
+			// 32: Standard library reserved
+			// 33: pointer
 
 			BrainfuckAddress instructionPointerAddress = GetBFCompilerMemoryAddress(instructionPointerAddressInt);
 			bfReal = "timeout:1000\n";
@@ -481,7 +491,6 @@ namespace CEBrainfuckCreator
 				}
 				lines = expandedCode.Split('\n').ToList();
 			}
-			
 		}
 
 		public static int GetInstruction(string instruction) {
