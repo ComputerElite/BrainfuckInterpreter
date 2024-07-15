@@ -317,7 +317,7 @@ namespace CEBrainfuckCreator
 						// output value starting at address till null
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddressNew(addressA);
-						bf += "[.>]";
+						bf += "[.>>]";
 						AfterGoToMemoryAddress(addressA);
 						break;
 					case "wrt.s":

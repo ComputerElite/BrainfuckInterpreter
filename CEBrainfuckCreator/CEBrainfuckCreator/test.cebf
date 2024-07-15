@@ -8,7 +8,7 @@ sad 1 new_line
 
 ;; readline
 set.a $input_pointer $input
-set.n $new_line 10
+set.n $new_line 13
 :input_loop
 in.c *$input_pointer
 jmp.eq *$input_pointer $new_line done
@@ -16,5 +16,5 @@ inc $input_pointer
 jmp input_loop
 
 :done
-out.s $input
+out.n $input
 wrt.s lol
