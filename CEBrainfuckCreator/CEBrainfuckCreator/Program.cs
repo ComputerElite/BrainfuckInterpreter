@@ -11,7 +11,7 @@ namespace CEBrainfuckCreator
 		public static int codeDepth = 0;
 		public static BrainfuckAddress currentMemoryAddress = new BrainfuckAddress();
 		public static int currentLine = 0;
-		public const int reservedMemoryLength = 24;
+		public const int reservedMemoryLength = 34;
 		public static Dictionary<string, BrainfuckAddress> variables = new Dictionary<string, BrainfuckAddress>();
 
 		// compiler options
@@ -317,7 +317,7 @@ namespace CEBrainfuckCreator
 						// output value starting at address till null
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddressNew(addressA);
-						bf += "[.>>]";
+						bf += "[.>+>]<[-<<]>";
 						AfterGoToMemoryAddress(addressA);
 						break;
 					case "wrt.s":
@@ -401,6 +401,13 @@ namespace CEBrainfuckCreator
 					finalBF = finalBF.Replace("<>", "").Replace("><", "");
 				}
 			}
+
+			// Output assigned addresses
+			string addressMappingString = "";
+			foreach(KeyValuePair<string, BrainfuckAddress> a in variables) {
+				addressMappingString += ";; " + a.Value.ToString() + "\n";
+			}
+			finalBF = addressMappingString + finalBF;
 
 			if (minify)
 			{

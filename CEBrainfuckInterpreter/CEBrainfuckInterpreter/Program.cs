@@ -68,10 +68,7 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 			}
 			brainfuck = brainfuck.Replace("\t", "");
 			Console.Clear();
-			Console.SetCursorPosition(0, 0);
-			//Console.WriteLine(brainfuck);
-			Console.WriteLine("");
-			Console.WriteLine("starting execution " + brainfuck.Length);
+			
 			while (programPosition < brainfuck.Length)
 			{
 				if (args.Length >= 2 && args[1] == "debug" || input == "DEBUG")
@@ -117,7 +114,7 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 						memory[pointer]--;
 						break;
 					case '.': // Write memory to console
-						Console.WriteLine((char)memory[pointer]);
+						Console.Write((char)memory[pointer]);
 						break;
 					case '[': // Open loop
 						lastLoopOpen.Insert(0, memory[pointer] == 0 || lastLoopOpen.Count >= 1 && lastLoopOpen[0] == -1 ? -1 : programPosition);
@@ -127,7 +124,7 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 						{
 							lastLoopOpen.RemoveAt(0);
 							break;
-						}
+						}	 
 						programPosition = lastLoopOpen[0];
 						lastLoopOpen.RemoveAt(0);
 						continue;
@@ -135,16 +132,20 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 						// Set cursor position to bottom
 						char c = Console.ReadKey(true).KeyChar;
 						memory[pointer] = (byte)c;
-						Console.WriteLine(c + " at " + pointer);
+						break;
+					case '#':
+						//Console.WriteLine("Pointer at " + pointer + " with value " + memory[pointer]);
 						break;
 
 				}
 				programPosition++;
 			}
-			Console.WriteLine("Done");
-			Display();
-			Console.CursorTop += 2;
+			//Console.WriteLine("Done");
+			//Display();
+			//Console.CursorTop += 2;
 			//Console.WriteLine(programPosition);
+			Console.WriteLine();
+			Console.ReadKey();
 		}
 
 
