@@ -49,6 +49,7 @@ namespace CEBrainfuckCreator
 			}
 
 			for(int i = 0; i < reservedMemoryLength; i++) {
+				// perhaps it's gonna bite me that I assign cebf_compiler addresses and cebf_stdlib under seperate names to the same address. Oh boy...
 				AssignVariable("cebf_compiler_" + i, GetBFCompilerMemoryAddress(i));
 			}
 			for(int i = 0; i < standardLibraryAddressesInt.Count; i++) {
