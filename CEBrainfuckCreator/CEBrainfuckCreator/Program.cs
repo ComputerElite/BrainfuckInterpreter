@@ -244,7 +244,7 @@ namespace CEBrainfuckCreator
 						break;
 					case "set.c":
 						addressA = GetAddress(cmds[1]);
-						value = HandleReservedValue(cmds[2][0]);
+						value = cmds[2][0];
 						SetAddressValue(addressA, value);
 						break;
 					case "set.s":
@@ -758,12 +758,6 @@ namespace CEBrainfuckCreator
 			ResetAddressValue(tmpAAddress);
 			ResetAddressValue(tmpBAddress);
 			ResetAddressValue(tmpCAddress);
-		}
-
-		public static int HandleReservedValue(int value)
-		{
-			//if (value == '^') return ' ';
-			return value;
 		}
 
 		public static int ConvertToInt(string number)
