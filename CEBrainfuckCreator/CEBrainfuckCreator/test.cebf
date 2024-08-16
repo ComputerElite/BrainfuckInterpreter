@@ -2,7 +2,7 @@ wrt.s Writing "Hello World" to file.txt
 
 ;; set command to execute
 set.n $cebf_interpreter_0 1
-wrt.s cat /dev/stdin > file.txt
+wrt.s "cat /dev/stdin > file.txt" ;; test stuff
 
 ;; invoke command thus redirect in and output to that process
 set.n $cebf_interpreter_0 2
