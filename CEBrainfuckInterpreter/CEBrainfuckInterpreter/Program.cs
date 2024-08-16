@@ -163,14 +163,16 @@ namespace CEBrainFuck
 								});
 								currentBashCommand = "";
 								OutputsToProcessIfRunning();
+								memory[0] = 0x0;
 								break;
 							case 0x3: // close the current process and come back to the console
 								if (currentProcess != null)
 								{
-									currentProcess.Close();
+									currentProcess.Kill();
 									currentProcess = null;
 								}
 								OutputsToConsole();
+								memory[0] = 0x0;
 								break;
 							case 0x4: // Output to console
 								ConsoleStandardOutput.WriteByte(memory[pointer]);
@@ -209,7 +211,6 @@ namespace CEBrainFuck
 			//Console.CursorTop += 2;
 			//Console.WriteLine(programPosition);
 			Console.WriteLine();
-			Console.ReadKey();
 		}
 
 

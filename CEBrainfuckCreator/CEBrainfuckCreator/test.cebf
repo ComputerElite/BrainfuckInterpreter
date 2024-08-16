@@ -1,29 +1,19 @@
-#include standard.cebf
+wrt.s Writing "Hello World" to file.txt
 
-set.n $cebf_interpreter_0 4
-wrt.s Hello directly to console. Now doing via echo\n
-
-;; set command to echo "Hello world" and invoke it
+;; set command to execute
 set.n $cebf_interpreter_0 1
-wrt.s echo "Hello world"
+wrt.s cat /dev/stdin > file.txt
+
+;; invoke command thus redirect in and output to that process
 set.n $cebf_interpreter_0 2
 wrt.n
 
-
-
-:read
-;; read from stdin of process
+;; Send file contents to stdin of bash
 set.n $cebf_interpreter_0 0
-in.c 0
-;; if stream end go to end of stream
-jmp.nz $cebf_interpreter_1 end_of_stream
-;; else output whatever was on stdin on console
-set.n $cebf_interpreter_0 4
-out.r 0
-jmp read
+wrt.s Hello World
 
+;; kill process
+set.n $cebf_interpreter_0 3
+wrt.n
 
-
-:end_of_stream
-set.n $cebf_interpreter_0 4
-wrt.s \n\n\nEnd of program
+wrt.s done

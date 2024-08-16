@@ -1,0 +1,29 @@
+#include standard.cebf
+
+set.n $cebf_interpreter_0 4
+wrt.s Hello directly to console. Now doing via echo\n
+
+;; set command to echo "Hello world" and invoke it
+set.n $cebf_interpreter_0 1
+wrt.s echo "Hello world"
+set.n $cebf_interpreter_0 2
+wrt.n
+
+
+
+:read
+;; read from stdin of process
+set.n $cebf_interpreter_0 0
+in.c 0
+;; if stream end go to end of stream
+jmp.nz $cebf_interpreter_1 end_of_stream
+;; else output whatever was on stdin on console
+set.n $cebf_interpreter_0 4
+out.r 0
+jmp read
+
+
+
+:end_of_stream
+set.n $cebf_interpreter_0 4
+wrt.s \n\n\nEnd of program
