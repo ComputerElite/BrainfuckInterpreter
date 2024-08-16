@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 
 namespace CEBrainFuck
 {
@@ -43,7 +45,29 @@ namespace CEBrainFuck
 			}
 		}
 
-static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
+		static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
+		private static Stream StandardOutput;
+		private static Stream StandardInput;
+		private static Stream ConsoleStandardOutput;
+		private static Stream ConsoleStandardInput;
+		private static Process? currentProcess = null;
+
+		static void OutputsToConsole()
+		{
+			StandardInput = ConsoleStandardInput;
+			StandardOutput = ConsoleStandardOutput;
+		}
+		
+		static void OutputsToProcessIfRunning()
+		{
+			if (currentProcess == null || currentProcess.HasExited)
+			{
+				OutputsToConsole();
+				return;
+			}
+			StandardInput = currentProcess.StandardOutput.BaseStream;
+			StandardOutput = currentProcess.StandardInput.BaseStream;
+		}
 
 		static void Main(string[] args)
 		{
@@ -58,6 +82,10 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
                 Console.Write(i + "   " + (char)i);
             }
             */
+			ConsoleStandardOutput = Console.OpenStandardOutput();
+			ConsoleStandardInput = Console.OpenStandardInput();
+			OutputsToConsole();
+
 			if (args.Length > 0) brainfuck = File.ReadAllText(args[0]);
 			else
 			{
@@ -68,7 +96,8 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 			}
 			brainfuck = brainfuck.Replace("\t", "");
 			Console.Clear();
-			
+
+			string currentBashCommand = "";
 			while (programPosition < brainfuck.Length)
 			{
 				if (args.Length >= 2 && args[1] == "debug" || input == "DEBUG")
@@ -114,7 +143,41 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 						memory[pointer]--;
 						break;
 					case '.': // Write memory to console
-						Console.Write((char)memory[pointer]);
+						//Console.WriteLine("\n" + memory[0]);
+						switch (memory[0])
+						{
+							case 0x0: // write to stdout (aka process if it's there
+								StandardOutput.WriteByte(memory[pointer]);
+								break;
+							case 0x1: // append to bash command buffer
+								currentBashCommand += (char)memory[pointer];
+								break;
+							case 0x2: // redirect stdout and stdin to bash command in currentBashCommand
+								currentProcess = Process.Start(new ProcessStartInfo
+								{
+									FileName ="bash",
+									ArgumentList = { "-c", currentBashCommand },
+									RedirectStandardOutput = true,
+									RedirectStandardInput = true,
+									UseShellExecute = false
+								});
+								currentBashCommand = "";
+								OutputsToProcessIfRunning();
+								break;
+							case 0x3: // close the current process and come back to the console
+								if (currentProcess != null)
+								{
+									currentProcess.Close();
+									currentProcess = null;
+								}
+								OutputsToConsole();
+								break;
+							case 0x4: // Output to console
+								ConsoleStandardOutput.WriteByte(memory[pointer]);
+								break;
+						}
+						// write to stdout
+						
 						break;
 					case '[': // Open loop
 						lastLoopOpen.Insert(0, memory[pointer] == 0 || lastLoopOpen.Count >= 1 && lastLoopOpen[0] == -1 ? -1 : programPosition);
@@ -129,14 +192,15 @@ static char[] validBf = new char[] {'+', '-', '.', ',', '<', '>', '[', ']'};
 						lastLoopOpen.RemoveAt(0);
 						continue;
 					case ',': // Set the memory to the inputted key
-						// Set cursor position to bottom
-						char c = Console.ReadKey(true).KeyChar;
-						memory[pointer] = (byte)c;
+						int b = StandardInput.ReadByte();
+						if(b == -1) OutputsToConsole(); // end of stream
+						memory[1] = b == -1 ? (byte)0x1 : (byte)0x0;
+						memory[pointer] = b != -1 ? (byte)b : (byte)0x0;
 						break;
 					case '#':
-						//Console.WriteLine("Pointer at " + pointer + " with value " + memory[pointer]);
+						Console.WriteLine("Pointer at " + pointer + " with value " + memory[pointer]);
 						break;
-
+					
 				}
 				programPosition++;
 			}

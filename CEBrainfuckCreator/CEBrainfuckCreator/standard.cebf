@@ -9,7 +9,6 @@
 macro jmp.eq 3
 ;; subtract both values from each other
 sub $0 $1 $cebf_stdlib_0
-dbg
 ;; if the result is 0, the values are equal and thus we jump
 jmp.ez $cebf_stdlib_0 $2
 macroend

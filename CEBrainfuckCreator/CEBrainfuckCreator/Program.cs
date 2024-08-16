@@ -58,7 +58,8 @@ namespace CEBrainfuckCreator
 		}
 
 		private static void AssignVariable(string name, BrainfuckAddress address) {
-			if (variables.ContainsKey(name)) variables.Add(name, address);
+			if (!variables.ContainsKey(name)) variables.Add(name, address);
+			address.name = name;
 			variables[name] = address;
 			if (commentCode) bf += ";; Assigned memory address " + address + " the name '" + name + "'\n";
 		}
@@ -95,7 +96,9 @@ namespace CEBrainfuckCreator
 			int instructionCounter = 1;
 
 
-			// Compiler memory layout
+			// Compiler memory layout (as per GetBFCompilerMemoryAddress)
+			// -2: interpreter reserved
+			// -1: interpreter reserved
 			// 0: math a
 			// 1: math b
 			// 2: math result
@@ -134,6 +137,9 @@ namespace CEBrainfuckCreator
 			BrainfuckAddress instructionPointerAddress = GetBFCompilerMemoryAddress(instructionPointerAddressInt);
 			bfReal = "timeout:1000\n";
 			// reserve first 10 memory addresses for variables of the compiler
+			bfReal += ">>  ;;; Reserve bf interpreter memory space";
+			AssignVariable("cebf_interpreter_0", GetBFCompilerMemoryAddress(-2));
+			AssignVariable("cebf_interpreter_1", GetBFCompilerMemoryAddress(-1));
 			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
 			
 			bfReal += bf;
@@ -240,9 +246,11 @@ namespace CEBrainfuckCreator
 						break;
 					case "set.s":
 						addressA = GetAddress(cmds[1]);
-						foreach (char c in cmds[2])
+						cmds.RemoveAt(0);
+						cmds.RemoveAt(1);
+						foreach (char c in String.Join(' ', cmds))
 						{
-							SetAddressValue(addressA, HandleReservedValue(c));
+							SetAddressValue(addressA, c);
 							addressA.IncrementProgram();
 							Console.WriteLine(addressA.ToString());
 						}
@@ -257,6 +265,12 @@ namespace CEBrainfuckCreator
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddressNew(addressA);
 						bf += "+";
+						AfterGoToMemoryAddress(addressA);
+						break;
+					case "dec":
+						addressA = GetAddress(cmds[1]);
+						GoToMemoryAddressNew(addressA);
+						bf += "-";
 						AfterGoToMemoryAddress(addressA);
 						break;
 					case "set.a":
@@ -324,8 +338,12 @@ namespace CEBrainfuckCreator
 					case "wrt.s":
 						// writes a string to the output
 						cmds.RemoveAt(0);
-						string s = String.Join(" ", cmds);
+						string s = String.Join(" ", cmds).Replace("\\n", "\n");
 						OutputString(s);
+						break;
+					case "wrt.n":
+						// writes a string to the output
+						OutputString("\0");
 						break;
 					case "out.b":
 						// output 'true' if the address is > 0 otherwise 'false'
@@ -659,7 +677,7 @@ namespace CEBrainfuckCreator
 
 		public static int GetRealAddress(BrainfuckAddress address)
 		{
-			int tmpAddress = address.address + reservedMemoryLength;
+			int tmpAddress = address.address + reservedMemoryLength + 2; // + 2 for interpreter reserved address
 			return tmpAddress;
 		}
 
