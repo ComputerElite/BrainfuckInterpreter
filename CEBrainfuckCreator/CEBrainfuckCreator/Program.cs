@@ -197,9 +197,12 @@ namespace CEBrainfuckCreator
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
 				if (lines[currentLine] == "") lines[currentLine] = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
+				bfReal += "\n;;" + SanitizeComment(lines[currentLine]) + "\n";
+				int commentIndex = lines[currentLine].IndexOf(";;");
+				if(commentIndex != -1) lines[currentLine] = lines[currentLine].Substring(0, commentIndex);
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
+				cmds = ApplyQuotationMarkChecks(cmds);
 				string cmd = cmds[0];
-				bfReal += "\n;;" + SanitizeComment(lines[currentLine]) + "\n";	
 				BrainfuckAddress addressA;
 				BrainfuckAddress addressB;
 				BrainfuckAddress addressC;
@@ -436,6 +439,31 @@ namespace CEBrainfuckCreator
 			Console.WriteLine("Finished bf: \n\n" + finalBF);
 			//ClipboardService.SetText(finalBF);
 			File.WriteAllText("compiled.bf", finalBF);
+		}
+
+		private static List<string> ApplyQuotationMarkChecks(List<string> cmds)
+		{
+			bool inQuotationMark = false;
+			List<string> newCmds = new List<string>();
+			foreach (string s in cmds)
+			{
+				bool wasInQuotationMark = inQuotationMark;
+				string nS = s;
+				if (s.StartsWith("\""))
+				{
+					inQuotationMark = true;
+					nS = s.Substring(1);
+				}
+				if (s.EndsWith("\"") && !s.EndsWith("\\\""))
+				{
+					inQuotationMark = false;
+					nS = s.Substring(0, s.Length - 1);
+				}
+				if (wasInQuotationMark) newCmds[^1] += " " + nS;
+				else newCmds.Add(nS);
+			}
+
+			return newCmds;
 		}
 
 		private static string SanitizeComment(string comment)
@@ -734,7 +762,7 @@ namespace CEBrainfuckCreator
 
 		public static int HandleReservedValue(int value)
 		{
-			if (value == '^') return ' ';
+			//if (value == '^') return ' ';
 			return value;
 		}
 
