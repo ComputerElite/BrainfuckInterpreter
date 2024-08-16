@@ -37,8 +37,8 @@
 ;; __CONSTANTS
 ;; $cebf_compiler_0; $cebf_compiler_1 $cebf_compiler_2          Internal compiler addresses, use with caution!!! See compiler code for address explenation
 
-;; __RESERVED CHARACTERS__
-;;     ^: space
+;; __ARGUMENTS__
+;; Arguments are split by space. However they're grouped by quotes.
 
 ;; __MACROS__
 ;; macro <name> <argumentCount>                                 starts a macro. Use $0 $1 $2 ... to get the arguments of your macro
@@ -49,7 +49,7 @@
 ;; #include <file/lib name>                     Includes a file from the local file system or standard libraries by replacing the include with the file content
 
 ;; __COMPILER FLAGS__
-;;   Make comments with ;;
+;;   Add comments with ;;
 ;;   Add #nocomment to strip the all comments from this file
 ;;   Add #minify to strip all line breaks and compiler added comments from the finished code
 ;;   Add #commentcode to let the compiler comment the brainfuck code
