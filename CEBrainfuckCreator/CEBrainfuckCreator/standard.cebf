@@ -21,6 +21,8 @@ set.a $cebf_stdlib_1 $0
 set.a $cebf_stdlib_2 $1
 jmp cebf_stdlib_string_compare_loop
 
+
+
 ;; compare the strings character for character
 :cebf_stdlib_string_compare_pre_loop
 ;; move to next characters
