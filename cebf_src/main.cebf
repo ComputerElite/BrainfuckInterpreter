@@ -1,8 +1,17 @@
 #include lib/bash.cebf
+#include lib/standard.cebf
 #produceprecompilecebf
+sad 1 string
+sad 0 length
+set.s $string "fuck this shit"
+string.get_length $length $string
+string.get_length $length $string
+out.int $length
 
-wrt.s Writing to file
+
+
 exit
+wrt.s Writing to file
 bash.set_command "cat /dev/stdin > file.txt"
 bash.start_command_in_buffer
 wrt.s Written by cebf

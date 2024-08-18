@@ -57,15 +57,15 @@ jmp $2
 macroend
 
 ;; Stores the length of a string in a variable
-;; string.length <length_store_address> <string_address>
+;; string.get_length <length_store_address> <string_address>
 macro string.get_length 2
 set.n $0 0
-set.a $cebf_stdlib_1 $1
+set.a $cebf_stdlib_0 $1
 
 :cebf_stdlib_string_get_length__loop
-jmp.ez *$cebf_stdlib_1 cebf_stdlib_string_get_length__end
+jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end
 inc $0
-inc $cebf_stdlib_1
+inc $cebf_stdlib_0
 
 jmp cebf_stdlib_string_get_length__loop
 
@@ -73,6 +73,16 @@ jmp cebf_stdlib_string_get_length__loop
 
 macroend
 
-;; Usage
-macro string.to_int 1
+;; Converts a string into an int
+;; string.to_int <string_address> <int_store_address>
+macro string.to_int 2
+macroend
+
+;; Outputs an int at an address
+;; out.int <address>
+macro out.int 1
+cpy $0 $cebf_stdlib_0
+set.n $cebf_stdlib_1 48
+add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
+out.r $cebf_stdlib_0
 macroend

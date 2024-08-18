@@ -71,7 +71,7 @@ namespace CEBrainfuckCreator
 				instructionCounter++;
 				if(lines[currentLine].StartsWith(":")) {
 					Console.WriteLine("Found label " + lines[currentLine]);
-					string label = lines[currentLine].Substring(1);
+					string label = lines[currentLine].Substring(1).Split(' ')[0];
 					labels.Add(label, instructionCounter);
 				}
 			}
@@ -457,7 +457,7 @@ namespace CEBrainfuckCreator
 			File.WriteAllText(outputFile, finalBF);
 		}
 
-		private static List<string> ApplyQuotationMarkChecks(List<string> cmds)
+		public static List<string> ApplyQuotationMarkChecks(List<string> cmds)
 		{
 			bool inQuotationMark = false;
 			List<string> newCmds = new List<string>();
@@ -1051,7 +1051,7 @@ namespace CEBrainfuckCreator
 		public string content {get;set;} = "";
 		public string name {get;set;} = "";
 		public int argumentCount {get;set;} = 0;
-
+		public int callsSoFar { get; set; } = 0;
 		public string Expand(int line, List<string> arguments) {
 			if(arguments.Count != argumentCount) {
 				Program.Error(line, "Expected " + argumentCount + " arguments but " + arguments.Count + " were given.");
@@ -1061,6 +1061,41 @@ namespace CEBrainfuckCreator
 				if(arguments[i].Contains(" ")) arguments[i] = "\"" + arguments[i] + "\"";
 				expanded = expanded.Replace("$" + i, arguments[i]);
 			}
+			// find labels
+			List<string> lines = expanded.Split("\n").ToList();
+			Dictionary<string, string> labels = new Dictionary<string, string>();
+			for (int i = 0; i < lines.Count; i++)
+			{
+				if (lines[i].StartsWith(":"))
+				{
+					string labelName = lines[i].Substring(1).Split(' ')[0];
+					labels.Add(labelName, labelName + "___call_" + callsSoFar);
+					lines[i] =":" + labels[labelName];
+				}
+			}
+			// replace with numbered labels
+			for (int i = 0; i < lines.Count; i++)
+			{
+				List<string> args = Program.ApplyQuotationMarkChecks(lines[i].Split(' ').ToList());
+				for (int j = 0; j < args.Count; j++)
+				{
+					if (labels.ContainsKey(args[j]))
+					{
+						args[j] = labels[args[j]];
+					}
+				}
+
+				lines[i] = "";
+				foreach (string arg in args)
+				{
+					string toInsert = arg;
+					if(arg.Contains(" ")) toInsert = "\"" + arg + "\"";
+					lines[i] += toInsert + " ";
+				}
+				if(lines[i].EndsWith(" ")) lines[i] = lines[i].Substring(0, lines[i].Length - 1);
+			}
+			expanded = String.Join("\n", lines);
+			callsSoFar++;
 			return expanded.TrimEnd('\n');
 		}
 	}

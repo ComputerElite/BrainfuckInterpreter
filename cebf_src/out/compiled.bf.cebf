@@ -61,9 +61,99 @@
 ;;jmp cebf_stdlib_bash_run_command_and_kill_at_end_of_file__loop
 ;;:cebf_stdlib_bash_run_command_and_kill_at_end_of_file__exit
 ;;macroend
+;; Standard library for cebf
+;; by ComputerElite 2024
+;;
+;; The standard library contains macros which are useful for writing programs in cebf💩
+;; The compiler automatically reserves space for the standard library and you won't have to worry about overwriting any of it's variables when using it💩
+;; memory layout:
+;; $cebf_stdlib_0: jmp💩eq
+;; $cebf_stdlib_1: string💩compare
+;; $cebf_stdlib_2: string💩compare
+;; jump if equal
+;; jmp💩eq 💩addressA💩 💩addressB💩 💩label💩
+;;macro jmp.eq 3
+;;;; subtract both values from each other
+;;sub $0 $1 $cebf_stdlib_0
+;;;; if the result is 0💩 the values are equal and thus we jump
+;;jmp.ez $cebf_stdlib_0 $2
+;;macroend
+;; compare two strings
+;; string💩compare 💩addressA💩 💩addressB💩 💩label💩
+;;macro string.compare 3
+;;;; create pointers to the strings
+;;set.a $cebf_stdlib_1 $0
+;;set.a $cebf_stdlib_2 $1
+;;jmp cebf_stdlib_string_compare_loop
+;;;; compare the strings character for character
+;;:cebf_stdlib_string_compare_pre_loop
+;;;; move to next characters
+;;inc $cebf_stdlib_1
+;;inc $cebf_stdlib_2
+;;:cebf_stdlib_string_compare_loop
+;;out.r *$cebf_stdlib_1
+;;out.r *$cebf_stdlib_2
+;;;; if both characters are equal check what they are
+;;jmp.eq *$cebf_stdlib_1 *$cebf_stdlib_2 cebf_stdlib_string_compare_compare_succeeded
+;;;; now check if any of the strings are null
+;;jmp cebf_stdlib_string_compare_compare_failed
+;;:cebf_stdlib_string_compare_compare_succeeded
+;;;; if the first string is not null💩 we haven't reached the end of the string yet
+;;jmp.nz *$cebf_stdlib_1 cebf_stdlib_string_compare_pre_loop
+;;;; string end reached and they're the same💩 Nice!!
+;;jmp $2
+;;:cebf_stdlib_string_compare_compare_failed
+;;macroend
+;; Stores the length of a string in a variable
+;; string💩get_length 💩length_store_address💩 💩string_address💩
+;;macro string.get_length 2
+;;set.n $0 0
+;;set.a $cebf_stdlib_0 $1
+;;:cebf_stdlib_string_get_length__loop
+;;jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end
+;;inc $0
+;;inc $cebf_stdlib_0
+;;jmp cebf_stdlib_string_get_length__loop
+;;:cebf_stdlib_string_get_length__end
+;;macroend
+;; Converts a string into an int
+;; string💩to_int 💩string_address💩 💩int_store_address💩
+;;macro string.to_int 2
+;;macroend
+;; Outputs an int at an address
+;; out💩int 💩address💩
+;;macro out.int 1
+;;cpy $0 $cebf_stdlib_0
+;;set.n $cebf_stdlib_1 48
+;;add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
+;;out.r $cebf_stdlib_0
+;;macroend
 #produceprecompilecebf
-wrt.s Writing to file
+sad 1 string
+sad 0 length
+set.s $string "fuck this shit"
+set.n $length 0
+set.a $cebf_stdlib_0 $string
+:cebf_stdlib_string_get_length__loop___call_0
+jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end___call_0
+inc $length
+inc $cebf_stdlib_0
+jmp cebf_stdlib_string_get_length__loop___call_0
+:cebf_stdlib_string_get_length__end___call_0
+set.n $length 0
+set.a $cebf_stdlib_0 $string
+:cebf_stdlib_string_get_length__loop___call_1
+jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end___call_1
+inc $length
+inc $cebf_stdlib_0
+jmp cebf_stdlib_string_get_length__loop___call_1
+:cebf_stdlib_string_get_length__end___call_1
+cpy $length $cebf_stdlib_0
+set.n $cebf_stdlib_1 48
+add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
+out.r $cebf_stdlib_0
 exit
+wrt.s Writing to file
 ;; save current interpreter output mode for restoring later
 cpy $cebf_interpreter_0 $cebf_stdlib_0
 set.n $cebf_interpreter_0 1
