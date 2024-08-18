@@ -176,7 +176,7 @@ namespace CEBrainfuckCreator
 				}
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				cmds = ApplyQuotationMarkChecks(cmds);
-				if(cmds[0] == "macro") {
+				if(cmds.Count >0 &&cmds[0] == "macro") {
 					inFunction = true;
 					currentFunction = "";
 					currentFunctionName = cmds[1];
@@ -460,6 +460,7 @@ namespace CEBrainfuckCreator
 			List<string> newCmds = new List<string>();
 			foreach (string s in cmds)
 			{
+				if (s.StartsWith(";;")) break;
 				bool wasInQuotationMark = inQuotationMark;
 				string nS = s.Replace("\\\"", "\"");
 				if (s.StartsWith("\""))
@@ -517,6 +518,8 @@ namespace CEBrainfuckCreator
 			}
 		}
 
+		private static List<string> alreadyIncludedFiles = new List<string>();
+		
 		private static List<string> ResolveFile(string name, string fileItsIncludedFrom)
 		{
 			string path;
@@ -528,8 +531,11 @@ namespace CEBrainfuckCreator
 			{
 				path = name;
 			}
+
+			if (alreadyIncludedFiles.Contains(path)) return new List<string>();// already included
 			if(File.Exists(path)) {
 				Console.WriteLine("Including: " + path);
+				alreadyIncludedFiles.Add(path);
 			} else {
 				Error(currentLine, "File not found: " + path);
 				return new List<string>();
@@ -563,6 +569,11 @@ namespace CEBrainfuckCreator
 				for(int i = 0; i < lines.Count; i++) {
 					List<string> cmds = lines[i].Split(' ').ToList();
 					cmds = ApplyQuotationMarkChecks(cmds);
+					if (cmds.Count == 0)
+					{
+						expandedCode += lines[i] + "\n";
+						continue;
+					}
 					string macroName = cmds[0];
 					cmds.RemoveAt(0);
 					if(!macros.ContainsKey(macroName)) {
@@ -746,9 +757,9 @@ namespace CEBrainfuckCreator
 			BrainfuckAddress tmpBAddress = GetBFCompilerMemoryAddress(1);
 			ResetAddressValue(tmpAAddress);
 			ResetAddressValue(tmpBAddress);
-			ResetAddressValue(addressC);
 			Copy(addressA, tmpAAddress);
 			Copy(addressB, tmpBAddress);
+			ResetAddressValue(addressC);
 			GoToMemoryAddressNew(tmpAAddress); // compiler addresses don't need a back
 		}
 
@@ -756,8 +767,8 @@ namespace CEBrainfuckCreator
 		{
 			BrainfuckAddress tmpAAddress = GetBFCompilerMemoryAddress(0);
 			ResetAddressValue(tmpAAddress);
-			ResetAddressValue(addressB);
 			Copy(addressA, tmpAAddress);
+			ResetAddressValue(addressB);
 			GoToMemoryAddressNew(tmpAAddress); // compiler addresses don't need a back
 		}
 
@@ -806,8 +817,9 @@ namespace CEBrainfuckCreator
 				}
 				return a;
 			}
-			a.address = ProgramAddressToCompiledAddress(ConvertToInt(address));
-			return a;
+
+			return new BrainfuckAddress(ProgramAddressToCompiledAddress(ConvertToInt(address)), "",
+				ConvertToInt(address));
 		}
 
 		public static int ProgramAddressToCompiledAddress(int address) {

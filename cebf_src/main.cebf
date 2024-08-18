@@ -1,11 +1,17 @@
 #include lib/bash.cebf
 #include lib/standard.cebf
+#include lib/math.cebf
 #produceprecompilecebf
-sad 1 string
-sad 0 length
-set.s $string "fuck this"
-string.get_length $length $string
-out.int $length
+;;sad 1 string
+;;sad 0 length
+;;set.s $string "fuck this"
+;;string.get_length $length $string
+;;string.get_length $string $length
+;;out.int $length
+set.s 1 "123"
+string.to_int 1 0
+out.r 0
+
 
 
 

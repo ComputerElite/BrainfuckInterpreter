@@ -1,0 +1,16 @@
+;; Function to calculate the power of a number
+;; math.power <base_value_address> <power_value_address> <result_address>
+macro math.power 3
+set.n $2 1
+cpy $0 $cebf_stdlib_0
+cpy $1 $cebf_stdlib_1
+
+:cebf_stdlib_math_power__loop
+jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end
+
+mpl $cebf_stdlib_0 $2 $2
+dec $cebf_stdlib_1
+jmp cebf_stdlib_math_power__loop
+
+:cebf_stdlib_math_power__end
+macroend

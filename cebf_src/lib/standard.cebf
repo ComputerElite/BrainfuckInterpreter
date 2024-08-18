@@ -4,10 +4,8 @@
 ;; The standard library contains macros which are useful for writing programs in cebf.
 ;; The compiler automatically reserves space for the standard library and you won't have to worry about overwriting any of it's variables when using it.
 
-;; memory layout:
-;; $cebf_stdlib_0: jmp.eq
-;; $cebf_stdlib_1: string.compare
-;; $cebf_stdlib_2: string.compare
+#include math.cebf
+#include bash.cebf
 
 ;; jump if equal
 ;; jmp.eq <addressA> <addressB> <label>
@@ -64,7 +62,6 @@ set.a $cebf_stdlib_0 $1
 
 :cebf_stdlib_string_get_length__loop
 jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end
-out.r *$cebf_stdlib_0
 inc $0
 inc $cebf_stdlib_0
 
@@ -77,6 +74,38 @@ macroend
 ;; Converts a string into an int
 ;; string.to_int <string_address> <int_store_address>
 macro string.to_int 2
+;; get length of string
+string.get_length $cebf_stdlib_2 $0
+
+set.a $cebf_stdlib_3 $0 
+set.n $1 0
+dec $cebf_stdlib_2
+add $cebf_stdlib_3 $cebf_stdlib_2 $cebf_stdlib_3 ;; pointer in 3 now points to last char of string aka least significant
+
+set.n $cebf_stdlib_5 0 ;; power of 10
+set.n $cebf_stdlib_6 10 ;; base 10
+set.n $cebf_stdlib_7 48 ;; ascii to digit conversion constant
+
+:cebf_stdlib_string_to_int__loop
+jmp.ez $cebf_stdlib_2 cebf_stdlib_string_to_int__end
+
+;; instead of writing back to the original address we could just use another stdlib address but I decided to safe addresses here.
+
+sub $cebf_stdlib_7 *$cebf_stdlib_3 *$cebf_stdlib_3 ;; convert ascii to digit
+
+math.power $cebf_stdlib_6 $cebf_stdlib_5 $cebf_stdlib_4 ;; calculate power of 10
+
+mpl $cebf_stdlib_4 *$cebf_stdlib_3 $cebf_stdlib_4 ;; multiply digit with power of 10
+
+add *$cebf_stdlib_3 $cebf_stdlib_7 *$cebf_stdlib_3 ;; restore damage we did to original memory cell
+add $cebf_stdlib_4 $1 $1 ;; add to result
+dec $cebf_stdlib_3 ;; move to next character
+dec $cebf_stdlib_2 ;; decrement remaining string length
+inc $cebf_stdlib_5 ;; increase power of 10
+jmp cebf_stdlib_string_to_int__loop
+
+:cebf_stdlib_string_to_int__end
+
 macroend
 
 ;; Outputs an int at an address

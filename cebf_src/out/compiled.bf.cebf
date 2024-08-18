@@ -66,10 +66,19 @@
 ;;
 ;; The standard library contains macros which are useful for writing programs in cebf💩
 ;; The compiler automatically reserves space for the standard library and you won't have to worry about overwriting any of it's variables when using it💩
-;; memory layout:
-;; $cebf_stdlib_0: jmp💩eq
-;; $cebf_stdlib_1: string💩compare
-;; $cebf_stdlib_2: string💩compare
+;; Function to calculate the power of a number
+;; math💩power 💩base_value_address💩 💩power_value_address💩 💩result_address💩
+;;macro math.power 3
+;;set.n $2 1
+;;cpy $0 $cebf_stdlib_0
+;;cpy $1 $cebf_stdlib_1
+;;:cebf_stdlib_math_power__loop
+;;jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end
+;;mpl $cebf_stdlib_0 $2 $2
+;;dec $cebf_stdlib_1
+;;jmp cebf_stdlib_math_power__loop
+;;:cebf_stdlib_math_power__end
+;;macroend
 ;; jump if equal
 ;; jmp💩eq 💩addressA💩 💩addressB💩 💩label💩
 ;;macro jmp.eq 3
@@ -111,7 +120,6 @@
 ;;set.a $cebf_stdlib_0 $1
 ;;:cebf_stdlib_string_get_length__loop
 ;;jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end
-;;out.r *$cebf_stdlib_0
 ;;inc $0
 ;;inc $cebf_stdlib_0
 ;;jmp cebf_stdlib_string_get_length__loop
@@ -120,6 +128,28 @@
 ;; Converts a string into an int
 ;; string💩to_int 💩string_address💩 💩int_store_address💩
 ;;macro string.to_int 2
+;;;; get length of string
+;;string.get_length $cebf_stdlib_2 $0
+;;set.a $cebf_stdlib_3 $0
+;;set.n $1 0
+;;dec $cebf_stdlib_2
+;;add $cebf_stdlib_3 $cebf_stdlib_2 $cebf_stdlib_3 ;; pointer in 3 now points to last char of string aka least significant
+;;set.n $cebf_stdlib_5 0 ;; power of 10
+;;set.n $cebf_stdlib_6 10 ;; base 10
+;;set.n $cebf_stdlib_7 48 ;; ascii to digit conversion constant
+;;:cebf_stdlib_string_to_int__loop
+;;jmp.ez $cebf_stdlib_2 cebf_stdlib_string_to_int__end
+;;;; instead of writing back to the original address we could just use another stdlib address but I decided to safe addresses here💩
+;;sub $cebf_stdlib_7 *$cebf_stdlib_3 *$cebf_stdlib_3 ;; convert ascii to digit
+;;math.power $cebf_stdlib_6 $cebf_stdlib_5 $cebf_stdlib_4 ;; calculate power of 10
+;;mpl $cebf_stdlib_4 *$cebf_stdlib_3 $cebf_stdlib_4 ;; multiply digit with power of 10
+;;add *$cebf_stdlib_3 $cebf_stdlib_7 *$cebf_stdlib_3 ;; restore damage we did to original memory cell
+;;add $cebf_stdlib_4 $1 $1 ;; add to result
+;;dec $cebf_stdlib_3 ;; move to next character
+;;dec $cebf_stdlib_2 ;; decrement remaining string length
+;;inc $cebf_stdlib_5 ;; increase power of 10
+;;jmp cebf_stdlib_string_to_int__loop
+;;:cebf_stdlib_string_to_int__end
 ;;macroend
 ;; Outputs an int at an address
 ;; out💩int 💩address💩
@@ -130,25 +160,54 @@
 ;;out.r $cebf_stdlib_0
 ;;macroend
 #produceprecompilecebf
-sad 1 string
-sad 0 length
-set.s $string "fuck this"
-set.n $length 0
-set.a $cebf_stdlib_0 $string
+;;sad 1 string
+;;sad 0 length
+;;set💩s $string "fuck this"
+;;string💩get_length $length $string
+;;string💩get_length $string $length
+;;out💩int $length
+set.s 1 "123"
+
+set.n $cebf_stdlib_2 0
+set.a $cebf_stdlib_0 1
 :cebf_stdlib_string_get_length__loop___call_0
 jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end___call_0
-out.r *$cebf_stdlib_0
-inc $length
+inc $cebf_stdlib_2
 inc $cebf_stdlib_0
 jmp cebf_stdlib_string_get_length__loop___call_0
 :cebf_stdlib_string_get_length__end___call_0
-set.n $cebf_stdlib_1 48
-cpy $length $cebf_stdlib_0
-add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
-out.r $cebf_stdlib_0
+set.a $cebf_stdlib_3 1
+set.n 0 0
+dec $cebf_stdlib_2
+add $cebf_stdlib_3 $cebf_stdlib_2 $cebf_stdlib_3
+set.n $cebf_stdlib_5 0
+set.n $cebf_stdlib_6 10
+set.n $cebf_stdlib_7 48
+:cebf_stdlib_string_to_int__loop___call_0
+jmp.ez $cebf_stdlib_2 cebf_stdlib_string_to_int__end___call_0
+
+sub $cebf_stdlib_7 *$cebf_stdlib_3 *$cebf_stdlib_3
+set.n $cebf_stdlib_4 1
+cpy $cebf_stdlib_6 $cebf_stdlib_0
+cpy $cebf_stdlib_5 $cebf_stdlib_1
+:cebf_stdlib_math_power__loop___call_0
+jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end___call_0
+mpl $cebf_stdlib_0 $cebf_stdlib_4 $cebf_stdlib_4
+dec $cebf_stdlib_1
+jmp cebf_stdlib_math_power__loop___call_0
+:cebf_stdlib_math_power__end___call_0
+mpl $cebf_stdlib_4 *$cebf_stdlib_3 $cebf_stdlib_4
+add *$cebf_stdlib_3 $cebf_stdlib_7 *$cebf_stdlib_3
+add $cebf_stdlib_4 0 0
+dec $cebf_stdlib_3
+dec $cebf_stdlib_2
+inc $cebf_stdlib_5
+jmp cebf_stdlib_string_to_int__loop___call_0
+:cebf_stdlib_string_to_int__end___call_0
+out.r 0
 exit
 wrt.s Writing to file
-;; save current interpreter output mode for restoring later
+
 cpy $cebf_interpreter_0 $cebf_stdlib_0
 set.n $cebf_interpreter_0 1
 wrt.s "cat /dev/stdin > file.txt"
@@ -159,4 +218,5 @@ wrt.s Written by cebf
 set.n $cebf_interpreter_0 3
 wrt.n
 wrt.s Wrote content to file
+
 
