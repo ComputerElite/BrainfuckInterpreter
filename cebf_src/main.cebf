@@ -3,8 +3,7 @@
 #produceprecompilecebf
 sad 1 string
 sad 0 length
-set.s $string "fuck this shit"
-string.get_length $length $string
+set.s $string "fuck this"
 string.get_length $length $string
 out.int $length
 

@@ -255,9 +255,6 @@ namespace CEBrainfuckCreator
 						addressA = new BrainfuckAddress(ProgramAddressToCompiledAddress(programAddress), name, programAddress);
 						AssignVariable(name, addressA);
 						break;
-					case "dbg":
-						bf += "#";
-						break;
 					case "set.c":
 						addressA = GetAddress(cmds[1]);
 						value = cmds[2][0];
@@ -266,7 +263,7 @@ namespace CEBrainfuckCreator
 					case "set.s":
 						addressA = GetAddress(cmds[1]);
 						cmds.RemoveAt(0);
-						cmds.RemoveAt(1);
+						cmds.RemoveAt(0);
 						foreach (char c in String.Join(' ', cmds))
 						{
 							SetAddressValue(addressA, c);

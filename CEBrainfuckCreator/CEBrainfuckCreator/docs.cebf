@@ -30,8 +30,6 @@
 ;; or <address_a> <address_b> <address_c>       OR gate     if a or b then c is 1
 ;; xor <address_a> <address_b> <address_c>      XOR gate    if a and b are different then c is 1
 ;; not <address_a> <address_b>                  NOT gate    if a is 1 then b is 0 and vice versa
-;;
-;; dbg                                          Shows debug output on brainfuck helper vsc extension
 
 ;; __DEFINING VARIABLES__
 ;; sad <address> <name>                         gives an address a name you can use and access with '$name' on everything that uses addresses
