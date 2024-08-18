@@ -245,6 +245,10 @@ namespace CEBrainfuckCreator
 						IF(GetAddress(cmds[1]), new string('+', GetInstructionDiff(instructionCounter, nextInstruction)), new string('+', GetInstructionDiff(instructionCounter, GetInstruction(cmds[2]))));
 						nextInstruction = instructionCounter;
 						break;
+					case "exit":
+						bf += new string('+', GetInstructionDiff(instructionCounter, lines.Count - 1));
+						nextInstruction = instructionCounter;
+						break;
 					case "sad":
 						int programAddress = ConvertToInt(cmds[1]);
 						string name = cmds[2];

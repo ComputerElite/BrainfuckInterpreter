@@ -24,6 +24,7 @@ macroend
 ;; compare two strings
 ;; string.compare <addressA> <addressB> <label>
 macro string.compare 3
+
 ;; create pointers to the strings
 set.a $cebf_stdlib_1 $0
 set.a $cebf_stdlib_2 $1
@@ -53,4 +54,25 @@ jmp $2
 
 :cebf_stdlib_string_compare_compare_failed
 
+macroend
+
+;; Stores the length of a string in a variable
+;; string.length <length_store_address> <string_address>
+macro string.get_length 2
+set.n $0 0
+set.a $cebf_stdlib_1 $1
+
+:cebf_stdlib_string_get_length__loop
+jmp.ez *$cebf_stdlib_1 cebf_stdlib_string_get_length__end
+inc $0
+inc $cebf_stdlib_1
+
+jmp cebf_stdlib_string_get_length__loop
+
+:cebf_stdlib_string_get_length__end
+
+macroend
+
+;; Usage
+macro string.to_int 1
 macroend

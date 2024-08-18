@@ -131,13 +131,14 @@ namespace CEBrainFuck
 					case '<': // Decrease pointer
 						pointer--;
 						if (pointer < 0) {
-							pointer = 0;
+							throw new Exception("Memory underflow. This is not supported");
 						}
 						break;
 					case '>': // Increase pointer right
 						pointer++;
 						if (pointer >= memory.Length) {
 							// ToDo: increase memory limit
+							throw new Exception("Max memory location reached");
 						}
 						break;
 					case '+': // Increase value

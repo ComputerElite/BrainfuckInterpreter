@@ -22,7 +22,8 @@
 ;; inc <address>                                increments value at address
 ;; dec <address>                                decrements value at address
 ;; raw <start_address> <brainfuck_code>         Embeds raw brainfuck code into the compiled code (dangerous).
-;;
+;; exit                                         Quits the program
+;;                                          
 ;; __GATES__
 ;; and <address_a> <address_b> <address_c>      AND gate    if a and b then c is 1
 ;; nand <address_a> <address_b> <address_c>     NAND gate   if a and b then c is 0 else 1

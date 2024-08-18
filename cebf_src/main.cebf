@@ -2,6 +2,7 @@
 #produceprecompilecebf
 
 wrt.s Writing to file
+exit
 bash.set_command "cat /dev/stdin > file.txt"
 bash.start_command_in_buffer
 wrt.s Written by cebf
