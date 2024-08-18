@@ -1,0 +1,9 @@
+#include lib/bash.cebf
+#produceprecompilecebf
+
+wrt.s Writing to file
+bash.set_command "cat /dev/stdin > file.txt"
+bash.start_command_in_buffer
+wrt.s Written by cebf
+bash.kill_process
+wrt.s Wrote content to file

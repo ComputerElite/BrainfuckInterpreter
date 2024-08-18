@@ -1,10 +1,13 @@
+raw $cebf_interpreter_0 "#"
 ;;#commentcode
 #seperatestatemachine
-#include standard.cebf
+#include lib/standard.cebf
+#produceprecompilecebf
 
 sad 2 input
 sad 0 input_pointer
 sad 1 new_line
+
 
 ;; readline
 set.a $input_pointer $input

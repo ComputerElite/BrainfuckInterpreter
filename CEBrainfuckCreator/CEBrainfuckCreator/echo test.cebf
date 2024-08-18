@@ -9,8 +9,6 @@ wrt.s echo "Hello world"
 set.n $cebf_interpreter_0 2
 wrt.n
 
-
-
 :read
 ;; read from stdin of process
 set.n $cebf_interpreter_0 0
@@ -27,3 +25,4 @@ jmp read
 :end_of_stream
 set.n $cebf_interpreter_0 4
 wrt.s \n\n\nEnd of program
+set

@@ -1,14 +1,20 @@
-#include standard.cebf
+;;#include standard.cebf
 
-wrt.s Writing "Hello World" to file.txt
+set.n $cebf_interpreter_0 4
+wrt.s Writing Hello World to file.txt
 
 ;; set command to execute
 set.n $cebf_interpreter_0 1
-wrt.s "cat /dev/stdin > file.txt" ;; test stuff
+wrt.s cat /dev/stdin > file.txt ;; test stuff
 
 ;; invoke command thus redirect in and output to that process
 set.n $cebf_interpreter_0 2
 wrt.n
+
+;; Usage
+;; test
+macro test 3
+macroend
 
 :test
 
@@ -21,9 +27,3 @@ set.n $cebf_interpreter_0 3
 wrt.n
 
 wrt.s done
-
-;; Usage
-;; test <argument>
-macro test 
-
-macroend

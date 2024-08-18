@@ -95,7 +95,7 @@ namespace CEBrainFuck
 				}
 			}
 			brainfuck = brainfuck.Replace("\t", "");
-			Console.Clear();
+			//Console.Clear();
 
 			string currentBashCommand = "";
 			while (programPosition < brainfuck.Length)
@@ -130,11 +130,15 @@ namespace CEBrainFuck
 				{
 					case '<': // Decrease pointer
 						pointer--;
-						if (pointer < 0) pointer = memory.Length - 1;
+						if (pointer < 0) {
+							pointer = 0;
+						}
 						break;
 					case '>': // Increase pointer right
 						pointer++;
-						if (pointer >= memory.Length) pointer = 0;
+						if (pointer >= memory.Length) {
+							// ToDo: increase memory limit
+						}
 						break;
 					case '+': // Increase value
 						memory[pointer]++;
@@ -162,6 +166,7 @@ namespace CEBrainFuck
 									UseShellExecute = false
 								});
 								currentBashCommand = "";
+								Console.WriteLine("\nStarted process " +currentBashCommand);
 								OutputsToProcessIfRunning();
 								memory[0] = 0x0;
 								break;
@@ -194,12 +199,25 @@ namespace CEBrainFuck
 						lastLoopOpen.RemoveAt(0);
 						continue;
 					case ',': // Set the memory to the inputted key
-						int b = StandardInput.ReadByte();
-						if(b == -1) OutputsToConsole(); // end of stream
-						memory[1] = b == -1 ? (byte)0x1 : (byte)0x0;
-						memory[pointer] = b != -1 ? (byte)b : (byte)0x0;
+						switch(memory[0]) {
+							default:
+								int b = StandardInput.ReadByte();
+								if(b == -1) OutputsToConsole(); // end of stream
+								memory[1] = b == -1 ? (byte)0x1 : (byte)0x0;
+								memory[pointer] = b != -1 ? (byte)b : (byte)0x0;
+								break;
+							case 0x3:
+								memory[pointer] = (byte)(currentProcess == null || currentProcess.HasExited ? 0x0 : 0x1);
+								break;
+							case 0x4:
+								int c = ConsoleStandardInput.ReadByte();
+								memory[1] = c == -1 ? (byte)0x1 : (byte)0x0;
+								memory[pointer] = c != -1 ? (byte)c : (byte)0x0;
+								break;
+						}
 						break;
 					case '#':
+						Console.WriteLine(memory[0]);
 						Console.WriteLine("Pointer at " + pointer + " with value " + memory[pointer]);
 						break;
 					

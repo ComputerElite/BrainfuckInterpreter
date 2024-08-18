@@ -28,7 +28,7 @@ namespace CEBrainfuckCreator
 		{
 			try
 			{
-				Generate();
+				Generate(args.Length > 0 ? args[0] : "test.cebf",args.Length > 1 ? args[1] : "compiled.bf");
 			}
 			catch (Exception e)
 			{
@@ -84,12 +84,12 @@ namespace CEBrainfuckCreator
 		public const int pointerAddressInt = 33;
 		public static List<int> standardLibraryAddressesInt = new List<int> {7, 8, 9, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32};
 
-		public static void Generate(string file = "test.cebf")
+		public static void Generate(string file = "test.cebf", string outputFile = "compiled.bf")
 		{
 			lines = File.ReadAllLines(file).ToList();
 			
 			
-			HandleIncludes();
+			lines = HandleIncludes(lines, file);
 			TrimLines();
 			AddPredefinedVariables();
 
@@ -137,10 +137,10 @@ namespace CEBrainfuckCreator
 			BrainfuckAddress instructionPointerAddress = GetBFCompilerMemoryAddress(instructionPointerAddressInt);
 			bfReal = "timeout:1000\n";
 			// reserve first 10 memory addresses for variables of the compiler
-			bfReal += ">>  ;;; Reserve bf interpreter memory space";
+			bfReal += ">>  ;; Reserve bf interpreter memory space\n";
 			AssignVariable("cebf_interpreter_0", GetBFCompilerMemoryAddress(-2));
 			AssignVariable("cebf_interpreter_1", GetBFCompilerMemoryAddress(-1));
-			bfReal += new string('>', reservedMemoryLength) + "  ;;; Reserve bf compiler memory space";
+			bfReal += new string('>', reservedMemoryLength) + "  ;; Reserve bf compiler memory space\n";
 			
 			bfReal += bf;
 			bf = "";
@@ -175,6 +175,7 @@ namespace CEBrainfuckCreator
 					lines[currentLine] = ";;" + lines[currentLine];
 				}
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
+				cmds = ApplyQuotationMarkChecks(cmds);
 				if(cmds[0] == "macro") {
 					inFunction = true;
 					currentFunction = "";
@@ -188,12 +189,22 @@ namespace CEBrainfuckCreator
 				}
 			}
 
+			bfReal += "\n\n;; Found macros start\n";
+			foreach (KeyValuePair<string,BrainfuckMacro> brainfuckMacro in macros)
+			{
+				bfReal += SanitizeComment(brainfuckMacro.Key + " with " + brainfuckMacro.Value.argumentCount + " arguments\n");
+			}
+
+			bfReal += "\n;; Found macros end\n\n";
 			// Expand all macros
 			ExpandAllMacros();
 
 
 
 			FindLabels(); // MUST occur right before here
+			if(lines.Any(x => x.Contains("#produceprecompilecebf"))) {
+				File.WriteAllText(outputFile + ".cebf", String.Join('\n', lines));
+			}
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
 				if (lines[currentLine] == "") lines[currentLine] = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
@@ -215,10 +226,11 @@ namespace CEBrainfuckCreator
 				switch (cmd)
 				{
 					case "raw":
+						Console.WriteLine(cmds[1]);
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddressNew(addressA);
 						cmds.RemoveAt(0);
-						cmds.RemoveAt(1);
+						cmds.RemoveAt(0);
 						bf += String.Join(' ', cmds);
 						AfterGoToMemoryAddress(addressA);
 						break;
@@ -395,7 +407,7 @@ namespace CEBrainfuckCreator
 				string instructionPointerIncrementer = new string('+', instructionDiff);
 				
 				bf = "";
-				if(seperateStateMachine) instruction = "\n\t\t" + instruction + "\n";
+				if(seperateStateMachine) instruction = "\n       " + instruction + "\n";
 				bfReal += "-" + "[->+>+<<]>>[-<<+>>]<" + ">+<[>[-]<[-]]>[[-]<<" + instruction + instructionPointerIncrementer + ">>]<<";
 				instructionCounter++;
 			}
@@ -427,7 +439,7 @@ namespace CEBrainfuckCreator
 			// Output assigned addresses
 			string addressMappingString = "";
 			foreach(KeyValuePair<string, BrainfuckAddress> a in variables) {
-				addressMappingString += ";; " + a.Value.ToString() + "\n";
+				addressMappingString += ";; " + SanitizeComment(a.Value.ToString() + "\n");
 			}
 			finalBF = addressMappingString + finalBF;
 
@@ -436,9 +448,9 @@ namespace CEBrainfuckCreator
 				finalBF = Regex.Replace(finalBF, "[^" + allowedChars + "]", "");
 			}
 
-			Console.WriteLine("Finished bf: \n\n" + finalBF);
+			//Console.WriteLine("Finished bf: \n\n" + finalBF);
 			//ClipboardService.SetText(finalBF);
-			File.WriteAllText("compiled.bf", finalBF);
+			File.WriteAllText(outputFile, finalBF);
 		}
 
 		private static List<string> ApplyQuotationMarkChecks(List<string> cmds)
@@ -448,7 +460,7 @@ namespace CEBrainfuckCreator
 			foreach (string s in cmds)
 			{
 				bool wasInQuotationMark = inQuotationMark;
-				string nS = s;
+				string nS = s.Replace("\\\"", "\"");
 				if (s.StartsWith("\""))
 				{
 					inQuotationMark = true;
@@ -504,35 +516,42 @@ namespace CEBrainfuckCreator
 			}
 		}
 
-		private static List<string> ResolveFile(string name)
+		private static List<string> ResolveFile(string name, string fileItsIncludedFrom)
 		{
-			if(!File.Exists(name)) {
-				Error(currentLine, "File not found: " + name);
+			string path;
+			if (fileItsIncludedFrom.Contains("/"))
+			{
+				path = Path.GetDirectoryName(fileItsIncludedFrom) + "/" + name;
 			}
-			return File.ReadAllLines(name).ToList();
+			else
+			{
+				path = name;
+			}
+			if(File.Exists(path)) {
+				Console.WriteLine("Including: " + path);
+			} else {
+				Error(currentLine, "File not found: " + path);
+				return new List<string>();
+			}
+			return HandleIncludes(File.ReadAllLines(path).ToList(), path);
 		}
 
-		private static void HandleIncludes()
+		private static List<string> HandleIncludes(List<string> currentFileLines, string file)
 		{
-			bool includedSmth = true;
-			while (includedSmth)
+			for (int i = 0; i < currentFileLines.Count; i++)
 			{
-				includedSmth = false;
-				for (int i = 0; i < lines.Count; i++)
+				List<string> cmds = currentFileLines[i].Split(' ').ToList();
+				if (cmds[0] == "#include")
 				{
-					List<string> cmds = lines[i].Split(' ').ToList();
-					if (cmds[0] == "#include")
-					{
-						cmds.RemoveAt(0);
-						string includeFile = String.Join(' ', cmds);
-						List<string> includeLines = ResolveFile(includeFile);
-						lines.RemoveAt(i);
-						lines.InsertRange(i, includeLines);
-						includedSmth = true;
-						Console.WriteLine(i);
-					}
+					cmds.RemoveAt(0);
+					string includeFile = String.Join(' ', cmds);
+					List<string> includeLines = ResolveFile(includeFile, file);
+					currentFileLines.RemoveAt(i);
+					currentFileLines.InsertRange(i, includeLines);
 				}
 			}
+
+			return currentFileLines;
 		}
 
 		public static void ExpandAllMacros() {
@@ -542,9 +561,10 @@ namespace CEBrainfuckCreator
 				string expandedCode = "";
 				for(int i = 0; i < lines.Count; i++) {
 					List<string> cmds = lines[i].Split(' ').ToList();
+					cmds = ApplyQuotationMarkChecks(cmds);
 					string macroName = cmds[0];
 					cmds.RemoveAt(0);
-					if(cmds.Count <= 0 || !macros.ContainsKey(macroName)) {
+					if(!macros.ContainsKey(macroName)) {
 						expandedCode += lines[i] + "\n";
 						continue;
 					}
@@ -958,7 +978,7 @@ namespace CEBrainfuckCreator
 		public static void AddCommentInNewLine(string comment)
 		{
 			if (!bf.EndsWith("\n")) bf += "\n";
-			bf += ";;" + new string('\t', codeDepth) + SanitizeComment(comment) + "\n";
+			bf += ";;" + new string(' ', codeDepth * 4) + SanitizeComment(comment) + "\n";
 		}
 	}
 
@@ -1034,6 +1054,7 @@ namespace CEBrainfuckCreator
 			}
 			string expanded = content;
 			for (int i = 0; i < arguments.Count; i++) {
+				if(arguments[i].Contains(" ")) arguments[i] = "\"" + arguments[i] + "\"";
 				expanded = expanded.Replace("$" + i, arguments[i]);
 			}
 			return expanded.TrimEnd('\n');

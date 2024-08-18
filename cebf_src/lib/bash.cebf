@@ -1,0 +1,74 @@
+;; Bash library for cebf
+;; by ComputerElite 2024
+;;
+;; The bash library contains macros for interacting with the bash shell
+
+;; Appends a command to the cebf interpreter bash command buffer
+;; bash.set_command <string>
+macro bash.set_command 1
+;; save current interpreter output mode for restoring later
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s $0
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+macroend
+
+;; Starts the bash command in the bash buffer of the cebf interpreter. out/in streams will be redirected to started command
+;; bash.start_command_in_buffer
+macro bash.start_command_in_buffer 0 
+set.n $cebf_interpreter_0 2
+wrt.n
+macroend
+
+;; KIlls the process running in the cebf interpreter
+;; bash.kill_process
+macro bash.kill_process 0
+set.n $cebf_interpreter_0 3
+wrt.n
+macroend
+
+;; Reads stdout of the currently running bash process until the end of stream. Output will be null terminated
+;; bash.read_stdout_to_end <start_address>
+macro bash.read_stdout_to_end 1
+set.a $0 $cebf_stdlib_0
+;; check if process is running
+set.n $cebf_interpreter_0 3
+in.c $cebf_stdlib_1
+jmp.ez $cebf_stdlib_1 cebf_stdlib_bash_read_stdout_to_end__end
+
+set.n $cebf_interpreter_0 0
+:cebf_stdlib_bash_read_stdout_to_end__loop
+;; read stdout
+in.c *$cebf_stdlib_0
+inc $cebf_stdlib_0
+jmp.nz $cebf_interpreter_1 cebf_stdlib_bash_read_stdout_to_end__exit
+jmp cebf_stdlib_bash_read_stdout_to_end__loop
+
+:cebf_stdlib_bash_read_stdout_to_end__end
+;; null terminate string
+set.n *$cebf_stdlib_0 0
+
+:cebf_stdlib_bash_read_stdout_to_end__exit
+macroend
+
+;; Executes a bash command and kills it once the end of the output strea, was reached. Output stream is discarded
+;; bash.run_command_and_kill_at_end_of_file <command>
+macro bash.run_command_and_kill_at_end_of_file 1
+bash.set_command $0
+bash.start_command_in_buffer
+
+;; check if process is running
+set.n $cebf_interpreter_0 3
+in.c $cebf_stdlib_1
+jmp.ez $cebf_stdlib_1 cebf_stdlib_bash_run_command_and_kill_at_end_of_file__exit
+
+set.n $cebf_interpreter_0 0
+:cebf_stdlib_bash_run_command_and_kill_at_end_of_file__loop
+;; read stdout
+in.c $cebf_stdlib_1
+inc $cebf_stdlib_0
+jmp.nz $cebf_interpreter_1 cebf_stdlib_bash_run_command_and_kill_at_end_of_file__exit
+jmp cebf_stdlib_bash_run_command_and_kill_at_end_of_file__loop
+
+:cebf_stdlib_bash_run_command_and_kill_at_end_of_file__exit
+macroend
