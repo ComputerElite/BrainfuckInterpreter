@@ -8,14 +8,19 @@
 ;;string.get_length $length $string
 ;;string.get_length $string $length
 ;;out.int $length
-set.s 1 "123"
-string.to_int 1 0
-out.r 0
+all test 3
+all fuck 1
+set.s $test fu
+set.n $fuck 8
+out.n $test
+:infinity
+out.int $fuck
+jmp infinity
 
 
 
 
-exit
+
 wrt.s Writing to file
 bash.set_command "cat /dev/stdin > file.txt"
 bash.start_command_in_buffer

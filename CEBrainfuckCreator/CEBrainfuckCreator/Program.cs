@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.ComponentModel;
+using System.Data;
 using System.Text.RegularExpressions;
 
 namespace CEBrainfuckCreator
@@ -13,6 +14,7 @@ namespace CEBrainfuckCreator
 		public static int currentLine = 0;
 		public const int reservedMemoryLength = 34;
 		public static Dictionary<string, BrainfuckAddress> variables = new Dictionary<string, BrainfuckAddress>();
+		public static Dictionary<string, BrainfuckAddress> freedVars = new Dictionary<string, BrainfuckAddress>();
 
 		// compiler options
 		public static bool stripComments;
@@ -38,10 +40,14 @@ namespace CEBrainfuckCreator
 
 		public static void Error(int line, string error) {
 			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine(line + ": " + lines[line] + "\n        " + error);
+			Console.WriteLine("Error: " + lines[line].ToLineString() + "\n        " + error);
 			throw new Exception();
 		}
-		public static List<string> lines = new List<string>();
+		public static void Warning(int line, string warning) {
+			Console.ForegroundColor = ConsoleColor.Yellow;
+			Console.WriteLine("Warning: " + lines[line].ToLineString() + "\n        " + warning);
+		}
+		public static List<BrainfuckLine> lines = new List<BrainfuckLine>();
 
 		private static void AddPredefinedVariables() {
 			foreach(int addressInt in tmpAddressesInt) {
@@ -70,8 +76,8 @@ namespace CEBrainfuckCreator
 			{
 				instructionCounter++;
 				if(lines[currentLine].StartsWith(":")) {
-					Console.WriteLine("Found label " + lines[currentLine]);
 					string label = lines[currentLine].Substring(1).Split(' ')[0];
+					Console.WriteLine("found label " + label);
 					labels.Add(label, instructionCounter);
 				}
 			}
@@ -86,7 +92,7 @@ namespace CEBrainfuckCreator
 
 		public static void Generate(string file = "test.cebf", string outputFile = "compiled.bf")
 		{
-			lines = File.ReadAllLines(file).ToList();
+			lines = BrainfuckLine.FromFile(file);
 			
 			
 			lines = HandleIncludes(lines, file);
@@ -145,6 +151,8 @@ namespace CEBrainfuckCreator
 			bfReal += bf;
 			bf = "";
 			GoToMemoryAddressNew(instructionPointerAddress);
+			bfReal += bf;
+			bf = "";
 			bfReal += "+["; // Start state machine
 			AfterGoToMemoryAddress(instructionPointerAddress);
 
@@ -158,7 +166,7 @@ namespace CEBrainfuckCreator
 			// parse macros
 			bool inFunction = false;
 			string currentFunctionName = "";
-			string currentFunction = "";
+			List<BrainfuckLine> currentFunction = new List<BrainfuckLine>();
 			int argumentCount = 0;
 			for(currentLine = 0; currentLine < lines.Count; currentLine++) {
 				if(lines[currentLine].StartsWith("macroend")) {
@@ -166,19 +174,19 @@ namespace CEBrainfuckCreator
 					macros.Add(currentFunctionName, new BrainfuckMacro {
 						name = currentFunctionName,
 						argumentCount = argumentCount,
-						content = currentFunction
+						content = new List<BrainfuckLine>(currentFunction)
 					});
 					lines[currentLine] = ";;" + lines[currentLine];
 				}
 				if(inFunction) {
-					currentFunction += lines[currentLine] + "\n";
+					currentFunction.Add(lines[currentLine].Clone());
 					lines[currentLine] = ";;" + lines[currentLine];
 				}
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				cmds = ApplyQuotationMarkChecks(cmds);
 				if(cmds.Count >0 &&cmds[0] == "macro") {
 					inFunction = true;
-					currentFunction = "";
+					currentFunction.Clear();
 					currentFunctionName = cmds[1];
 					try {
 						argumentCount = ConvertToInt(cmds[2]);
@@ -192,7 +200,7 @@ namespace CEBrainfuckCreator
 			bfReal += "\n\n;; Found macros start\n";
 			foreach (KeyValuePair<string,BrainfuckMacro> brainfuckMacro in macros)
 			{
-				bfReal += SanitizeComment(brainfuckMacro.Key + " with " + brainfuckMacro.Value.argumentCount + " arguments\n");
+				bfReal += SanitizeComment(brainfuckMacro.Key + " with " + brainfuckMacro.Value.argumentCount + " arguments and " + brainfuckMacro.Value.content.Count + " lines\n");
 			}
 
 			bfReal += "\n;; Found macros end\n\n";
@@ -205,15 +213,23 @@ namespace CEBrainfuckCreator
 			if(lines.Any(x => x.Contains("#produceprecompilecebf"))) {
 				File.WriteAllText(outputFile + ".cebf", String.Join('\n', lines));
 			}
+
+			// Preprocess variable allocation and freeing
+			List<BrainfuckAddress> currentlyAllocated = new List<BrainfuckAddress>();
+			List<string> variablesThatWereAllocated = new List<string>();
+			List<int> allocatedProgramAddresses = new List<int>();
+			int maxAllocatedMemory = 0;
+			
+			
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
-				if (lines[currentLine] == "") lines[currentLine] = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
-				bfReal += "\n;;" + SanitizeComment(lines[currentLine]) + "\n";
+				if (lines[currentLine].content == "") lines[currentLine].content = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
+				bfReal += "\n;;" + SanitizeComment(lines[currentLine].content) + "\n";
 				int commentIndex = lines[currentLine].IndexOf(";;");
-				if(commentIndex != -1) lines[currentLine] = lines[currentLine].Substring(0, commentIndex);
+				if(commentIndex != -1) lines[currentLine].content = lines[currentLine].Substring(0, commentIndex);
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				cmds = ApplyQuotationMarkChecks(cmds);
-				string cmd = cmds[0];
+				string cmd = cmds.Count == 0 ? "" : cmds[0];
 				BrainfuckAddress addressA;
 				BrainfuckAddress addressB;
 				BrainfuckAddress addressC;
@@ -225,8 +241,65 @@ namespace CEBrainfuckCreator
 
 				switch (cmd)
 				{
+					case "all":
+						string allocatedName = cmds[1];
+						if (variablesThatWereAllocated.Contains(allocatedName))
+						{
+							Error(currentLine, "The variable "+ allocatedName + " was allocated before. You cannot allocate the same variable twice as variable names are global");
+							return;
+						}
+						int neededMemory = ConvertToInt(cmds[2]);
+						// get free address
+						int freeAddress = 0;
+						for (freeAddress = 0; freeAddress < 100000; freeAddress++)
+						{
+							if (allocatedProgramAddresses.Contains(freeAddress)) continue;
+							bool hasEnoughSpace = true;
+							for (int j = freeAddress + 1; j < freeAddress + neededMemory; j++)
+							{
+								if (allocatedProgramAddresses.Contains(j))
+								{
+									hasEnoughSpace = false;
+								}
+							}
+
+							if (hasEnoughSpace) break;
+						}
+
+						for (int i = freeAddress; i < freeAddress + neededMemory; i++)
+						{
+							allocatedProgramAddresses.Add(i);
+							if (i > maxAllocatedMemory) maxAllocatedMemory = i; // keep track of what's the max memory we needed
+						}
+						variablesThatWereAllocated.Add(allocatedName);
+						BrainfuckAddress allocated = new BrainfuckAddress(ProgramAddressToCompiledAddress(freeAddress),
+							allocatedName, freeAddress);
+						allocated.allocatedLength = neededMemory;
+						currentlyAllocated.Add(allocated);
+						AssignVariable(allocatedName, allocated);
+						break;
+					case "fre":
+						string freeName = cmds[1];
+						BrainfuckAddress? varToFree = currentlyAllocated.Find(x => x.name == freeName);
+						if (varToFree == null)
+						{
+							Error(currentLine, "The variable " + freeName + " is not allocated here");
+							return;
+						}
+
+						currentlyAllocated.Remove(varToFree);
+						for (int i = varToFree.programAddress;
+						     i < varToFree.programAddress + varToFree.allocatedLength;
+						     i++)
+						{
+							allocatedProgramAddresses.Remove(i);
+						}
+
+						varToFree.freedAt = lines[currentLine];
+						freedVars.Add(freeName, varToFree);
+						variables.Remove(freeName);
+						break;
 					case "raw":
-						Console.WriteLine(cmds[1]);
 						addressA = GetAddress(cmds[1]);
 						GoToMemoryAddressNew(addressA);
 						cmds.RemoveAt(0);
@@ -402,7 +475,7 @@ namespace CEBrainfuckCreator
 						NOTGate(addressA, addressB);
 						break;
 				}
-				GoToMemoryAddressNew(instructionPointerAddress); // we can ignore going back as the instruction pointer itself isn't considered a pointer in my definition of a pointer as an memory address
+				GoToMemoryAddressNew(instructionPointerAddress); // we can ignore going back as the instruction pointer itself isn't considered a pointer in my definition of a pointer as a memory address
 				int instructionDiff = GetInstructionDiff(instructionCounter, nextInstruction);
 				string instruction = bf;
 				string instructionPointerIncrementer = new string('+', instructionDiff);
@@ -499,7 +572,7 @@ namespace CEBrainfuckCreator
 					else
 					{
 						// sanitize comments
-						lines[i] = SanitizeComment(lines[i]);
+						lines[i].content = SanitizeComment(lines[i].content);
 					}
 				}
 			}
@@ -510,8 +583,8 @@ namespace CEBrainfuckCreator
 			// Prepare lines: trim
 			for (int i = 0; i < lines.Count; i++)
 			{
-				lines[i] = lines[i].Trim();
-				if(lines[i] == ""){
+				lines[i].content = lines[i].content.Trim();
+				if(lines[i].content == ""){
 					lines.RemoveAt(i);
 					i--;
 				}
@@ -520,7 +593,7 @@ namespace CEBrainfuckCreator
 
 		private static List<string> alreadyIncludedFiles = new List<string>();
 		
-		private static List<string> ResolveFile(string name, string fileItsIncludedFrom)
+		private static List<BrainfuckLine> ResolveFile(string name, string fileItsIncludedFrom)
 		{
 			string path;
 			if (fileItsIncludedFrom.Contains("/"))
@@ -532,18 +605,18 @@ namespace CEBrainfuckCreator
 				path = name;
 			}
 
-			if (alreadyIncludedFiles.Contains(path)) return new List<string>();// already included
+			if (alreadyIncludedFiles.Contains(path)) return new List<BrainfuckLine>();// already included
 			if(File.Exists(path)) {
 				Console.WriteLine("Including: " + path);
 				alreadyIncludedFiles.Add(path);
 			} else {
 				Error(currentLine, "File not found: " + path);
-				return new List<string>();
+				return new List<BrainfuckLine>();
 			}
-			return HandleIncludes(File.ReadAllLines(path).ToList(), path);
+			return HandleIncludes(BrainfuckLine.FromFile(path), path);
 		}
 
-		private static List<string> HandleIncludes(List<string> currentFileLines, string file)
+		private static List<BrainfuckLine> HandleIncludes(List<BrainfuckLine> currentFileLines, string file)
 		{
 			for (int i = 0; i < currentFileLines.Count; i++)
 			{
@@ -552,7 +625,7 @@ namespace CEBrainfuckCreator
 				{
 					cmds.RemoveAt(0);
 					string includeFile = String.Join(' ', cmds);
-					List<string> includeLines = ResolveFile(includeFile, file);
+					List<BrainfuckLine> includeLines = ResolveFile(includeFile, file);
 					currentFileLines.RemoveAt(i);
 					currentFileLines.InsertRange(i, includeLines);
 				}
@@ -565,25 +638,28 @@ namespace CEBrainfuckCreator
 			bool expandedMacro = true;
 			while(expandedMacro) {
 				expandedMacro = false;
-				string expandedCode = "";
+				List<BrainfuckLine> expandedCode = new List<BrainfuckLine>();
 				for(int i = 0; i < lines.Count; i++) {
 					List<string> cmds = lines[i].Split(' ').ToList();
 					cmds = ApplyQuotationMarkChecks(cmds);
 					if (cmds.Count == 0)
 					{
-						expandedCode += lines[i] + "\n";
+						expandedCode.Add(lines[i]);
 						continue;
 					}
 					string macroName = cmds[0];
 					cmds.RemoveAt(0);
 					if(!macros.ContainsKey(macroName)) {
-						expandedCode += lines[i] + "\n";
+						expandedCode.Add(lines[i]);
 						continue;
 					}
 					expandedMacro = true;
-					expandedCode += (commentCode ? ";; entering macro " + macroName + "\n" : "") + macros[macroName].Expand(i, cmds) + "\n" + (commentCode ? ";; exiting macro " + macroName + "\n" : "");
+					if (commentCode) expandedCode.Add(BrainfuckLine.CompilerNote(";; entering macro " + macroName));
+					expandedCode.AddRange(macros[macroName].Expand(i, cmds));
+					if(commentCode) expandedCode.Add(BrainfuckLine.CompilerNote(";; exiting macro " + macroName));
 				}
-				lines = expandedCode.Split('\n').ToList();
+
+				lines = expandedCode;
 			}
 		}
 
@@ -598,10 +674,19 @@ namespace CEBrainfuckCreator
 			int instructionDiff = nextInstruction - instructionCounter;
 			if(nextInstruction == 0) {
 				instructionDiff = 0;
-			} else if(instructionDiff < 0 && nextInstruction != 0) {
-				instructionDiff = lines.Count - instructionCounter + nextInstruction;
+			} else if(instructionDiff < 0)
+			{
+				instructionDiff =
+					lines.Count - instructionCounter + nextInstruction +
+					1; // Warning: I do not know why I have to add 1 here so this may screw me over
 			}
 			if(commentCode) bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
+			if (instructionDiff > 255)
+			{
+				Warning(currentLine,
+					"Instruction pointer set to " + instructionDiff +
+					". As this is greater than 255 the wrong instruction will execute if your interpreter uses memory cells with an 8 bit value.");
+			}
 			return instructionDiff;
 		}
 
@@ -812,8 +897,15 @@ namespace CEBrainfuckCreator
 					a.address = variables[varName].address;
 					a.programAddress = variables[varName].programAddress;
 					return a;
-				} else {
-					Error(currentLine, "Variable '" + varName + "' does not exist");
+				} else
+				{
+					string extraInfo = "";
+					if (freedVars.ContainsKey(varName))
+					{
+						BrainfuckAddress freedVar = freedVars[varName];
+						extraInfo = " It has been freed in line " + freedVar.freedAt.FileAndLine + ": \n" + freedVar.freedAt.ToLineString();
+					}
+					Error(currentLine, "Variable '" + varName + "' does not exist." + extraInfo);
 				}
 				return a;
 			}
@@ -1001,6 +1093,8 @@ namespace CEBrainfuckCreator
 		public int programAddress {get;set;} = 0;
 		public bool isPointer {get;set;} = false;
 		public bool isCompilerAddress {get;set;} = false;
+		public int allocatedLength { get; set; } = -1;
+		public BrainfuckLine freedAt { get; set; } = new BrainfuckLine("", "", -1);
 		public string name {get;set;} = "";
 
 		public BrainfuckAddress AsNonPointer() {
@@ -1045,47 +1139,195 @@ namespace CEBrainfuckCreator
 
 		public static BrainfuckAddress operator -(BrainfuckAddress a, BrainfuckAddress b) {
 			if(a.isPointer || b.isPointer) {
-				throw new Exception("Pointer arithmatic is currently not supported");
+				throw new Exception("Pointer arithmetic is currently not supported");
 			}
 			return new BrainfuckAddress(a.address - b.address);
 		}
 
         public override string ToString()
         {
-            return name + "@" + (isPointer ? "*" : "") + address + " (real: " + Program.GetRealAddress(this) + (isCompilerAddress ? "; compiler": "") + ")";
+            return (allocatedLength == -1 ? "" : "alloc: ") + name + "@" + (isPointer ? "*" : "") + address + " (real: " + Program.GetRealAddress(this) + (isCompilerAddress ? "; compiler": "") + ")" + (allocatedLength == -1 ? "" : "for " + allocatedLength);
         }
     }
 
-	public class BrainfuckMacro {
-		public string content {get;set;} = "";
+	public class BrainfuckLine
+	{
+		public string content = "";
+		public int orgFileLine = -1;
+		public string orgFile = "";
+
+		public static BrainfuckLine operator +(string a, BrainfuckLine b)
+		{
+			b.content = a + b.content;
+			return b;
+		}
+
+		public string FileAndLine
+		{
+			get
+			{
+				return orgFile + ":" + orgFileLine;
+			}
+		}
+
+		public bool Contains(string value)
+		{
+			return content.Contains(value);
+		}
+		
+		public override string ToString()
+		{
+			return content;
+		}
+
+		public List<string> Split(char splitCharacter)
+		{
+			return content.Split(splitCharacter).ToList();
+		}
+
+		public bool StartsWith(string value)
+		{
+			return content.StartsWith(value);
+		}
+
+		public string Substring(int startIndex)
+		{
+			return content.Substring(startIndex);
+		}
+		public string Substring(int startIndex, int endIndex)
+		{
+			return content.Substring(startIndex, endIndex);
+		}
+
+		public int IndexOf(string value)
+		{
+			return content.IndexOf(value);
+		}
+		
+		public string ToLower()
+		{
+			return content.ToLower();
+		}
+		
+		public BrainfuckLine(string content, string orgFile, int orgFileLine)
+		{
+			this.orgFileLine = orgFileLine;
+			this.content = content;
+			this.orgFile = orgFile;
+		}
+
+			public static List<BrainfuckLine> FromFile(string file)
+		{
+			List<BrainfuckLine> bl = new List<BrainfuckLine>();
+			string[] lines = File.ReadAllLines(file);
+			for (int i = 0; i < lines.Length; i++)
+			{
+				bl.Add(new BrainfuckLine(lines[i], file, i + 1) );
+			}
+
+			return bl;
+		}
+
+		public static BrainfuckLine CompilerNote(string content)
+		{
+			return new BrainfuckLine(content, "compiler generated", -1);
+		}
+
+		public string ToLineString()
+		{
+			return FileAndLine + "    " + content;
+		}
+
+		public BrainfuckLine Clone()
+		{
+			return new BrainfuckLine(content, orgFile, orgFileLine);
+		}
+	}
+
+	public class BrainfuckMacro
+	{
+		public List<BrainfuckLine> content { get; set; } = new List<BrainfuckLine>();
 		public string name {get;set;} = "";
 		public int argumentCount {get;set;} = 0;
 		public int callsSoFar { get; set; } = 0;
-		public string Expand(int line, List<string> arguments) {
+
+		private string Callify(string varOrLabel)
+		{
+			return varOrLabel + "___call_" + callsSoFar;
+		}
+		public List<BrainfuckLine> Expand(int line, List<string> arguments) {
 			if(arguments.Count != argumentCount) {
 				Program.Error(line, "Expected " + argumentCount + " arguments but " + arguments.Count + " were given.");
 			}
-			string expanded = content;
-			for (int i = 0; i < arguments.Count; i++) {
-				if(arguments[i].Contains(" ")) arguments[i] = "\"" + arguments[i] + "\"";
-				expanded = expanded.Replace("$" + i, arguments[i]);
-			}
+			List<BrainfuckLine> expanded = content.ConvertAll(x => x.Clone());
 			// find labels
-			List<string> lines = expanded.Split("\n").ToList();
+			// ToDo: Find variables
 			Dictionary<string, string> labels = new Dictionary<string, string>();
-			for (int i = 0; i < lines.Count; i++)
+			for (int i = 0; i < expanded.Count; i++)
 			{
-				if (lines[i].StartsWith(":"))
+				if (expanded[i].StartsWith(":"))
 				{
-					string labelName = lines[i].Substring(1).Split(' ')[0];
-					labels.Add(labelName, labelName + "___call_" + callsSoFar);
-					lines[i] =":" + labels[labelName];
+					string labelName = expanded[i].Substring(1).Split(' ')[0];
+					labels.Add(labelName, Callify(labelName));
+					expanded[i].content =":" + labels[labelName];
+				}
+
+				List<string> words = expanded[i].Split(' ');
+				string cmd = "";
+				string arg1 = "";
+				// find variable and already replace variable allocation and freeing
+				for (int j = 0; j < words.Count; j++)
+				{
+					string word = words[j];
+					if (word.StartsWith(";;")) break; // ignore comments
+					if (j == 0)
+					{
+						cmd = words[j];
+						continue;
+					}
+
+					if ((cmd == "sad" || cmd == "all") && j == 1)
+					{
+						arg1 = word;
+						continue;
+					}
+
+					if (cmd == "fre" && j == 1)
+					{
+						expanded[i].content = "fre " + Callify(word);
+						break;
+					}
+					
+					
+					if (cmd == "sad" && j == 2)
+					{
+						expanded[i].content = "sad " + arg1 + " " + Callify(word);
+						break;
+					}
+					if (cmd == "sad" && j == 2)
+					{
+						expanded[i].content = "all " + Callify(arg1) + " " + word;
+						break;
+					}
+					
+					
+					if (!word.StartsWith("$")) continue;
+					int convertTest;
+					if (int.TryParse(word.Substring(1), out convertTest)) continue; // it's an argument
+					if (Program.variables.ContainsKey(word.Substring(1))) continue; // is compiler var
+					if (labels.ContainsKey(word)) continue;
+					labels.Add(word, Callify(word));
 				}
 			}
+			// make sure arguments have quotation marks around them if needed and replace arguments
+			for (int i = 0; i < arguments.Count; i++) {
+				if(arguments[i].Contains(" ")) arguments[i] = "\"" + arguments[i] + "\"";
+				expanded.ForEach(x => x.content = x.content.Replace("$" + i, arguments[i]));
+			}
 			// replace with numbered labels
-			for (int i = 0; i < lines.Count; i++)
+			for (int i = 0; i < expanded.Count; i++)
 			{
-				List<string> args = Program.ApplyQuotationMarkChecks(lines[i].Split(' ').ToList());
+				List<string> args = Program.ApplyQuotationMarkChecks(expanded[i].Split(' ').ToList());
 				for (int j = 0; j < args.Count; j++)
 				{
 					if (labels.ContainsKey(args[j]))
@@ -1094,18 +1336,18 @@ namespace CEBrainfuckCreator
 					}
 				}
 
-				lines[i] = "";
+				expanded[i].content = "";
 				foreach (string arg in args)
 				{
 					string toInsert = arg;
 					if(arg.Contains(" ")) toInsert = "\"" + arg + "\"";
-					lines[i] += toInsert + " ";
+					expanded[i].content += toInsert + " ";
 				}
-				if(lines[i].EndsWith(" ")) lines[i] = lines[i].Substring(0, lines[i].Length - 1);
+				if(expanded[i].content.EndsWith(" ")) expanded[i].content = expanded[i].Substring(0, expanded[i].content.Length - 1);
 			}
-			expanded = String.Join("\n", lines);
+
 			callsSoFar++;
-			return expanded.TrimEnd('\n');
+			return expanded;
 		}
 	}
 }

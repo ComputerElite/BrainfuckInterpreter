@@ -33,6 +33,8 @@
 
 ;; __DEFINING VARIABLES__
 ;; sad <address> <name>                         gives an address a name you can use and access with '$name' on everything that uses addresses
+;; all <name> <length>                          Allocates addresses to that variable and gives it a name you can access with '$name'
+;; fre <name>                                   Frees the allocated addresses of an variable
 ;; __CONSTANTS
 ;; $cebf_compiler_0; $cebf_compiler_1 $cebf_compiler_2          Internal compiler addresses, use with caution!!! See compiler code for address explenation
 

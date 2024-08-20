@@ -166,46 +166,17 @@
 ;;string💩get_length $length $string
 ;;string💩get_length $string $length
 ;;out💩int $length
-set.s 1 "123"
-
-set.n $cebf_stdlib_2 0
-set.a $cebf_stdlib_0 1
-:cebf_stdlib_string_get_length__loop___call_0
-jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end___call_0
-inc $cebf_stdlib_2
-inc $cebf_stdlib_0
-jmp cebf_stdlib_string_get_length__loop___call_0
-:cebf_stdlib_string_get_length__end___call_0
-set.a $cebf_stdlib_3 1
-set.n 0 0
-dec $cebf_stdlib_2
-add $cebf_stdlib_3 $cebf_stdlib_2 $cebf_stdlib_3
-set.n $cebf_stdlib_5 0
-set.n $cebf_stdlib_6 10
-set.n $cebf_stdlib_7 48
-:cebf_stdlib_string_to_int__loop___call_0
-jmp.ez $cebf_stdlib_2 cebf_stdlib_string_to_int__end___call_0
-
-sub $cebf_stdlib_7 *$cebf_stdlib_3 *$cebf_stdlib_3
-set.n $cebf_stdlib_4 1
-cpy $cebf_stdlib_6 $cebf_stdlib_0
-cpy $cebf_stdlib_5 $cebf_stdlib_1
-:cebf_stdlib_math_power__loop___call_0
-jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end___call_0
-mpl $cebf_stdlib_0 $cebf_stdlib_4 $cebf_stdlib_4
-dec $cebf_stdlib_1
-jmp cebf_stdlib_math_power__loop___call_0
-:cebf_stdlib_math_power__end___call_0
-mpl $cebf_stdlib_4 *$cebf_stdlib_3 $cebf_stdlib_4
-add *$cebf_stdlib_3 $cebf_stdlib_7 *$cebf_stdlib_3
-add $cebf_stdlib_4 0 0
-dec $cebf_stdlib_3
-dec $cebf_stdlib_2
-inc $cebf_stdlib_5
-jmp cebf_stdlib_string_to_int__loop___call_0
-:cebf_stdlib_string_to_int__end___call_0
-out.r 0
-exit
+all test 3
+all fuck 1
+set.s $test fu
+set.n $fuck 8
+out.n $test
+:infinity
+set.n $cebf_stdlib_1 48
+cpy $fuck $cebf_stdlib_0
+add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
+out.r $cebf_stdlib_0
+jmp infinity
 wrt.s Writing to file
 
 cpy $cebf_interpreter_0 $cebf_stdlib_0
@@ -218,5 +189,3 @@ wrt.s Written by cebf
 set.n $cebf_interpreter_0 3
 wrt.n
 wrt.s Wrote content to file
-
-
