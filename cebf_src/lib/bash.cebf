@@ -20,6 +20,30 @@ set.n $cebf_interpreter_0 2
 wrt.n
 macroend
 
+
+;; Borked, please fix!!!
+;; Starts a bash process with the given command. The command must be a literal string and not a varable. std_in_content_address is a string variable that is written to stdin of the process once it started
+;; bash.execute_and_print_entire_output <command_as_string> <std_in_content_address>
+macro bash.execute_with_stdin_and_print_entire_output 2
+bash.set_command $0
+bash.start_command_in_buffer
+
+;; check if process is running
+set.n $cebf_interpreter_0 3
+in.c $cebf_stdlib_1
+jmp.ez $cebf_stdlib_1 cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit
+
+set.n $cebf_interpreter_0 0
+:cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__loop
+;; read stdout
+in.c $cebf_stdlib_0
+jmp.nz $cebf_interpreter_1 cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit
+out.r $cebf_stdlib_0
+jmp cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__loop
+
+:cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit
+macroend
+
 ;; KIlls the process running in the cebf interpreter
 ;; bash.kill_process
 macro bash.kill_process 0

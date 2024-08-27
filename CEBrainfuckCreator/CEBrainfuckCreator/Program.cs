@@ -1319,8 +1319,9 @@ namespace CEBrainfuckCreator
 					labels.Add(word, Callify(word));
 				}
 			}
-			// make sure arguments have quotation marks around them if needed and replace arguments
+			// make sure arguments have quotation marks around them if needed and replace arguments. Also escape quotation marks.
 			for (int i = 0; i < arguments.Count; i++) {
+				arguments[i] = arguments[i].Replace("\"", "\\\"");
 				if(arguments[i].Contains(" ")) arguments[i] = "\"" + arguments[i] + "\"";
 				expanded.ForEach(x => x.content = x.content.Replace("$" + i, arguments[i]));
 			}

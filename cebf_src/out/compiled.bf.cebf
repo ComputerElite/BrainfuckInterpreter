@@ -1,3 +1,23 @@
+;;💩commentcode
+#seperatestatemachine
+;; Standard library for cebf
+;; by ComputerElite 2024
+;;
+;; The standard library contains macros which are useful for writing programs in cebf💩
+;; The compiler automatically reserves space for the standard library and you won't have to worry about overwriting any of it's variables when using it💩
+;; Function to calculate the power of a number
+;; math💩power 💩base_value_address💩 💩power_value_address💩 💩result_address💩
+;;macro math.power 3
+;;set.n $2 1
+;;cpy $0 $cebf_stdlib_0
+;;cpy $1 $cebf_stdlib_1
+;;:cebf_stdlib_math_power__loop
+;;jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end
+;;mpl $cebf_stdlib_0 $2 $2
+;;dec $cebf_stdlib_1
+;;jmp cebf_stdlib_math_power__loop
+;;:cebf_stdlib_math_power__end
+;;macroend
 ;; Bash library for cebf
 ;; by ComputerElite 2024
 ;;
@@ -16,6 +36,24 @@
 ;;macro bash.start_command_in_buffer 0
 ;;set.n $cebf_interpreter_0 2
 ;;wrt.n
+;;macroend
+;; Starts a bash process with the given command💩 The command must be a literal string and not a varable💩 std_in_content_address is a string variable that is written to stdin of the process once it started
+;; bash💩execute_and_print_entire_output 💩command_as_string💩 💩std_in_content_address💩
+;;macro bash.execute_with_stdin_and_print_entire_output 2
+;;bash.set_command $0
+;;bash.start_command_in_buffer
+;;;; check if process is running
+;;set.n $cebf_interpreter_0 3
+;;in.c $cebf_stdlib_1
+;;jmp.ez $cebf_stdlib_1 cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit
+;;set.n $cebf_interpreter_0 0
+;;:cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__loop
+;;;; read stdout
+;;in.c $cebf_stdlib_0
+;;jmp.nz $cebf_interpreter_1 cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit
+;;out.r $cebf_stdlib_0
+;;jmp cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__loop
+;;:cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit
 ;;macroend
 ;; KIlls the process running in the cebf interpreter
 ;; bash💩kill_process
@@ -60,24 +98,6 @@
 ;;jmp.nz $cebf_interpreter_1 cebf_stdlib_bash_run_command_and_kill_at_end_of_file__exit
 ;;jmp cebf_stdlib_bash_run_command_and_kill_at_end_of_file__loop
 ;;:cebf_stdlib_bash_run_command_and_kill_at_end_of_file__exit
-;;macroend
-;; Standard library for cebf
-;; by ComputerElite 2024
-;;
-;; The standard library contains macros which are useful for writing programs in cebf💩
-;; The compiler automatically reserves space for the standard library and you won't have to worry about overwriting any of it's variables when using it💩
-;; Function to calculate the power of a number
-;; math💩power 💩base_value_address💩 💩power_value_address💩 💩result_address💩
-;;macro math.power 3
-;;set.n $2 1
-;;cpy $0 $cebf_stdlib_0
-;;cpy $1 $cebf_stdlib_1
-;;:cebf_stdlib_math_power__loop
-;;jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end
-;;mpl $cebf_stdlib_0 $2 $2
-;;dec $cebf_stdlib_1
-;;jmp cebf_stdlib_math_power__loop
-;;:cebf_stdlib_math_power__end
 ;;macroend
 ;; jump if equal
 ;; jmp💩eq 💩addressA💩 💩addressB💩 💩label💩
@@ -160,32 +180,40 @@
 ;;out.r $cebf_stdlib_0
 ;;macroend
 #produceprecompilecebf
-;;sad 1 string
-;;sad 0 length
-;;set💩s $string "fuck this"
-;;string💩get_length $length $string
-;;string💩get_length $string $length
-;;out💩int $length
-all test 3
-all fuck 1
-set.s $test fu
-set.n $fuck 8
-out.n $test
-:infinity
-set.n $cebf_stdlib_1 48
-cpy $fuck $cebf_stdlib_0
-add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
-out.r $cebf_stdlib_0
-jmp infinity
-wrt.s Writing to file
 
 cpy $cebf_interpreter_0 $cebf_stdlib_0
 set.n $cebf_interpreter_0 1
-wrt.s "cat /dev/stdin > file.txt"
+wrt.s "echo Test"
 cpy $cebf_stdlib_0 $cebf_interpreter_0
 set.n $cebf_interpreter_0 2
 wrt.n
-wrt.s Written by cebf
+
 set.n $cebf_interpreter_0 3
-wrt.n
-wrt.s Wrote content to file
+in.c $cebf_stdlib_1
+jmp.ez $cebf_stdlib_1 cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit___call_0
+set.n $cebf_interpreter_0 0
+:cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__loop___call_0
+
+in.c $cebf_stdlib_0
+jmp.nz $cebf_interpreter_1 cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit___call_0
+out.r $cebf_stdlib_0
+jmp cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__loop___call_0
+:cebf_stdlib_bash_execute_with_stdin_and_print_entire_output__exit___call_0
+sad 2 input
+sad 0 input_pointer
+sad 1 new_line
+;; readline
+set.a $input_pointer $input
+set.n $new_line 10
+:input_loop
+in.c *$input_pointer
+
+sub *$input_pointer $new_line $cebf_stdlib_0
+
+jmp.ez $cebf_stdlib_0 done
+inc $input_pointer
+jmp input_loop
+:done
+;; null terminate string and make sure to replace carriage return
+wrt.s output:
+out.n $input

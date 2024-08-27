@@ -1,0 +1,27 @@
+#include lib/bash.cebf
+#include lib/standard.cebf
+#produceprecompilecebf
+;;sad 1 string
+;;sad 0 length
+;;set.s $string "fuck this"
+;;string.get_length $length $string
+;;string.get_length $string $length
+;;out.int $length
+all test 3
+all fuck 1
+set.s $test fu
+set.n $fuck 8
+out.n $test
+:infinity
+out.int $fuck
+jmp infinity
+
+
+
+
+wrt.s Writing to file
+bash.set_command "cat /dev/stdin > file.txt"
+bash.start_command_in_buffer
+wrt.s Written by cebf
+bash.kill_process
+wrt.s Wrote content to file
