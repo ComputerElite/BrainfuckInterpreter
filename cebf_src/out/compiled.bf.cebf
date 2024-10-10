@@ -37,6 +37,7 @@
 ;;set.n $cebf_interpreter_0 2
 ;;wrt.n
 ;;macroend
+;; Borked💩 please fix!!!
 ;; Starts a bash process with the given command💩 The command must be a literal string and not a varable💩 std_in_content_address is a string variable that is written to stdin of the process once it started
 ;; bash💩execute_and_print_entire_output 💩command_as_string💩 💩std_in_content_address💩
 ;;macro bash.execute_with_stdin_and_print_entire_output 2
@@ -179,7 +180,26 @@
 ;;add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
 ;;out.r $cebf_stdlib_0
 ;;macroend
+;; Computes the result of a division
+;; math💩divide_without_remainder 💩divident_address💩 💩divisor_address💩 💩result_address💩
+;;macro math.divide_without_remainder 3
+;;cpy $0 $cebf_compiler_0
+;;cpy $1 $cebf_compiler_1
+;;raw $cebf_compiler_2 [-]>[-]>[-]<<<<[>[->+>+<<]>>[-<<+>>]<[-<<->>]>>+<<<<]>>
+;;cpy $cebf_compiler_4 $2
+;;macroend
 #produceprecompilecebf
+all divident 1
+all divisor 1
+all result 1
+set.n $divident 200
+set.n $divisor 5
+cpy $divident $cebf_compiler_0
+cpy $divisor $cebf_compiler_1
+raw $cebf_compiler_2 [-]>[-]>[-]<<<<[>[->+>+<<]>>[-<<+>>]<[-<<->>]>>+<<<<]>>
+cpy $cebf_compiler_4 $result
+raw $result #
+exit
 
 cpy $cebf_interpreter_0 $cebf_stdlib_0
 set.n $cebf_interpreter_0 1

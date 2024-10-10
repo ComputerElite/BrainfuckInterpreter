@@ -116,3 +116,12 @@ cpy $0 $cebf_stdlib_0
 add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
 out.r $cebf_stdlib_0
 macroend
+
+;; Computes the result of a division
+;; math.divide_without_remainder <divident_address> <divisor_address> <result_address>
+macro math.divide_without_remainder 3
+cpy $0 $cebf_compiler_0
+cpy $1 $cebf_compiler_1
+raw $cebf_compiler_2 [-]>[-]>[-]<<<<[>[->+>+<<]>>[-<<+>>]<[-<<->>]>>+<<<<]>>
+cpy $cebf_compiler_4 $2
+macroend

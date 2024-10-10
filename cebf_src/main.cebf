@@ -3,6 +3,16 @@
 #include lib/standard.cebf
 #produceprecompilecebf
 
+all divident 1
+all divisor 1
+all result 1
+set.n $divident 200
+set.n $divisor 5
+math.divide_without_remainder $divident $divisor $result
+raw $result #
+
+exit
+
 bash.execute_with_stdin_and_print_entire_output "echo Test" ""
 
 sad 2 input
