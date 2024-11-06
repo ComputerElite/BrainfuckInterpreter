@@ -50,7 +50,8 @@ namespace CEBrainFuck
 		private static Stream StandardInput;
 		private static Stream ConsoleStandardOutput;
 		private static Stream ConsoleStandardInput;
-		private static Process? currentProcess = null;
+		private static Dictionary<int, Process?> processes = new();
+		private static int selectedProcess = 0;
 
 		static void OutputsToConsole()
 		{
@@ -60,13 +61,13 @@ namespace CEBrainFuck
 		
 		static void OutputsToProcessIfRunning()
 		{
-			if (currentProcess == null || currentProcess.HasExited)
+			if (!processes.ContainsKey(selectedProcess) || processes[selectedProcess] == null || processes[selectedProcess].HasExited)
 			{
 				OutputsToConsole();
 				return;
 			}
-			StandardInput = currentProcess.StandardOutput.BaseStream;
-			StandardOutput = currentProcess.StandardInput.BaseStream;
+			StandardInput = processes[selectedProcess].StandardOutput.BaseStream;
+			StandardOutput = processes[selectedProcess].StandardInput.BaseStream;
 		}
 
 		static void Main(string[] args)
@@ -158,7 +159,7 @@ namespace CEBrainFuck
 								currentBashCommand += (char)memory[pointer];
 								break;
 							case 0x2: // redirect stdout and stdin to bash command in currentBashCommand
-								currentProcess = Process.Start(new ProcessStartInfo
+								processes[selectedProcess] = Process.Start(new ProcessStartInfo
 								{
 									FileName ="bash",
 									ArgumentList = { "-c", currentBashCommand },
@@ -167,21 +168,24 @@ namespace CEBrainFuck
 									UseShellExecute = false
 								});
 								currentBashCommand = "";
-								Console.WriteLine("\nStarted process " +currentBashCommand);
+								Console.WriteLine("\nStarted process " + currentBashCommand + " in slot " + selectedProcess);
 								OutputsToProcessIfRunning();
 								memory[0] = 0x0;
 								break;
 							case 0x3: // close the current process and come back to the console
-								if (currentProcess != null)
+								if (processes.ContainsKey(selectedProcess) && processes[selectedProcess] != null)
 								{
-									currentProcess.Kill();
-									currentProcess = null;
+									processes[selectedProcess].Kill();
+									processes.Remove(selectedProcess);
 								}
 								OutputsToConsole();
 								memory[0] = 0x0;
 								break;
 							case 0x4: // Output to console
 								ConsoleStandardOutput.WriteByte(memory[pointer]);
+								break;
+							case 0x5:
+								selectedProcess = memory[pointer];
 								break;
 						}
 						// write to stdout
@@ -208,7 +212,7 @@ namespace CEBrainFuck
 								memory[pointer] = b != -1 ? (byte)b : (byte)0x0;
 								break;
 							case 0x3:
-								memory[pointer] = (byte)(currentProcess == null || currentProcess.HasExited ? 0x0 : 0x1);
+								memory[pointer] = (byte)(!processes.ContainsKey(selectedProcess) || processes[selectedProcess] == null || processes[selectedProcess].HasExited ? 0x0 : 0x1);
 								break;
 							case 0x4:
 								int c = ConsoleStandardInput.ReadByte();
