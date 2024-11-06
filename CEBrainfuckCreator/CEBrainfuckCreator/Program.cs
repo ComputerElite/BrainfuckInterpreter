@@ -505,6 +505,17 @@ namespace CEBrainfuckCreator
 				finalBF += finalLine;
 			}
 
+
+			// Output assigned addresses
+			string addressMappingString = "";
+			foreach(KeyValuePair<string, BrainfuckAddress> a in variables) {
+				addressMappingString += ";; " + SanitizeComment(a.Value.ToString() + "\n");
+			}
+			finalBF = addressMappingString + finalBF;
+			if (minify)
+			{
+				finalBF = Regex.Replace(finalBF, "[^" + allowedChars + "]", "");
+			}
 			if(oMovement)
 			{
 				string oldBF = "";
@@ -515,17 +526,6 @@ namespace CEBrainfuckCreator
 				}
 			}
 
-			// Output assigned addresses
-			string addressMappingString = "";
-			foreach(KeyValuePair<string, BrainfuckAddress> a in variables) {
-				addressMappingString += ";; " + SanitizeComment(a.Value.ToString() + "\n");
-			}
-			finalBF = addressMappingString + finalBF;
-
-			if (minify)
-			{
-				finalBF = Regex.Replace(finalBF, "[^" + allowedChars + "]", "");
-			}
 
 			//Console.WriteLine("Finished bf: \n\n" + finalBF);
 			//ClipboardService.SetText(finalBF);
