@@ -20,6 +20,18 @@ set.n $cebf_interpreter_0 2
 wrt.n
 macroend
 
+;; Switches to a specified process. Expects raw number as argument
+;; bash.switch_to_process 
+macro bash.switch_to_process 1
+set.n $cebf_interpreter_0 $0
+wrt.n
+macroend
+
+;; Usage
+;; bash.switch_to_console
+macro bash.switch_to_console 0
+set.n $cebf_interpreter_0 4
+macroend
 
 ;; Borked, please fix!!!
 ;; Starts a bash process with the given command. The command must be a literal string and not a varable. std_in_content_address is a string variable that is written to stdin of the process once it started

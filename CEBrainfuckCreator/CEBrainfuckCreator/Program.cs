@@ -25,6 +25,7 @@ namespace CEBrainfuckCreator
 		public const string allowedChars = "<>+\\-\\[\\].,#";
 		public static Dictionary<string, int> labels = new Dictionary<string, int>();
 		public static Dictionary<string, BrainfuckMacro> macros = new Dictionary<string, BrainfuckMacro>();
+		public static int totalInstructionCount = 0;
 
 		public static void Main(string[] args)
 		{
@@ -71,14 +72,15 @@ namespace CEBrainfuckCreator
 		}
 
 		private static void FindLabels() {
-			int instructionCounter = 0;
+			totalInstructionCount = 0;
 			for(currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
-				instructionCounter++;
+				if (lines[currentLine].CanBeIgnoredForInstructionCounter()) continue;
+				totalInstructionCount++;
 				if(lines[currentLine].StartsWith(":")) {
 					string label = lines[currentLine].Substring(1).Split(' ')[0];
-					Console.WriteLine("found label " + label);
-					labels.Add(label, instructionCounter);
+					Console.WriteLine("found label " + label + " at " + totalInstructionCount);
+					labels.Add(label, totalInstructionCount);
 				}
 			}
 		}
@@ -230,6 +232,7 @@ namespace CEBrainfuckCreator
 				List<string> cmds = lines[currentLine].Split(' ').ToList();
 				cmds = ApplyQuotationMarkChecks(cmds);
 				string cmd = cmds.Count == 0 ? "" : cmds[0];
+				if (lines[currentLine].CanBeIgnoredForInstructionCounter()) continue;
 				BrainfuckAddress addressA;
 				BrainfuckAddress addressB;
 				BrainfuckAddress addressC;
@@ -283,7 +286,8 @@ namespace CEBrainfuckCreator
 						BrainfuckAddress? varToFree = currentlyAllocated.Find(x => x.name == freeName);
 						if (varToFree == null)
 						{
-							Error(currentLine, "The variable " + freeName + " is not allocated here");
+							
+							Error(currentLine, "The variable " + freeName + " is not allocated here. Allocated vars are: " + String.Join(", ", currentlyAllocated.Select(x => x.name)));
 							return;
 						}
 
@@ -304,6 +308,7 @@ namespace CEBrainfuckCreator
 						GoToMemoryAddressNew(addressA);
 						cmds.RemoveAt(0);
 						cmds.RemoveAt(0);
+						if(commentCode) bf += "\n;; Raw code" + "\n";
 						bf += String.Join(' ', cmds);
 						AfterGoToMemoryAddress(addressA);
 						break;
@@ -677,7 +682,7 @@ namespace CEBrainfuckCreator
 			} else if(instructionDiff < 0)
 			{
 				instructionDiff =
-					lines.Count - instructionCounter + nextInstruction +
+					totalInstructionCount - instructionCounter + nextInstruction +
 					1; // Warning: I do not know why I have to add 1 here so this may screw me over
 			}
 			if(commentCode) bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
@@ -993,8 +998,8 @@ namespace CEBrainfuckCreator
 		{
 			codeDepth++;
 			StartMathOperation(addressA, addressB, endAddress);
-			if (commentCode) AddCommentInNewLine("current address with next address and store result in the address after");
-			bf += "[>[->+>+<<]>>[-<<+>>]<<<-]";
+			if (commentCode) AddCommentInNewLine("multiply current address with next address and store result in the address after");
+			bf += ">>[-]>[-]<<<[>[->+>+<<]>>[-<<+>>]<<<-]";
 			EndMathOperation(addressA, addressB, endAddress);
 			codeDepth--;
 		}
@@ -1242,6 +1247,15 @@ namespace CEBrainfuckCreator
 		{
 			return new BrainfuckLine(content, orgFile, orgFileLine);
 		}
+
+		public bool CanBeIgnoredForInstructionCounter()
+		{
+			if (content.StartsWith("#")) return true;
+			int length = content.IndexOf(';');
+			if(length == -1) length = content.Length;
+			string tmpLine = content.Substring(0, length).Trim();
+			return tmpLine == "";
+		}
 	}
 
 	public class BrainfuckMacro
@@ -1286,7 +1300,7 @@ namespace CEBrainfuckCreator
 						continue;
 					}
 
-					if ((cmd == "sad" || cmd == "all") && j == 1)
+					if ((cmd == "sad") && j == 1)
 					{
 						arg1 = word;
 						continue;
@@ -1297,6 +1311,11 @@ namespace CEBrainfuckCreator
 						expanded[i].content = "fre " + Callify(word);
 						break;
 					}
+					if (cmd == "all" && j == 1)
+					{
+						expanded[i].content = "all " + Callify(word) + " " + words[j+1];
+						break;
+					}
 					
 					
 					if (cmd == "sad" && j == 2)
@@ -1304,17 +1323,12 @@ namespace CEBrainfuckCreator
 						expanded[i].content = "sad " + arg1 + " " + Callify(word);
 						break;
 					}
-					if (cmd == "sad" && j == 2)
-					{
-						expanded[i].content = "all " + Callify(arg1) + " " + word;
-						break;
-					}
 					
 					
-					if (!word.StartsWith("$")) continue;
+					if (!word.TrimStart('*').StartsWith("$")) continue;
 					int convertTest;
-					if (int.TryParse(word.Substring(1), out convertTest)) continue; // it's an argument
-					if (Program.variables.ContainsKey(word.Substring(1))) continue; // is compiler var
+					if (int.TryParse(word.TrimStart('*').Substring(1), out convertTest)) continue; // it's an argument
+					if (Program.variables.ContainsKey(word.TrimStart('*').Substring(1))) continue; // is compiler var
 					if (labels.ContainsKey(word)) continue;
 					labels.Add(word, Callify(word));
 				}

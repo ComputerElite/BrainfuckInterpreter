@@ -99,9 +99,10 @@ namespace CEBrainFuck
 			//Console.Clear();
 
 			string currentBashCommand = "";
+			bool hasSeenDebugStartFlag = false;
 			while (programPosition < brainfuck.Length)
 			{
-				if (args.Length >= 2 && args[1] == "debug" || input == "DEBUG")
+				if (args.Length >= 2 && args[1] == "debug" || input == "DEBUG" && hasSeenDebugStartFlag)
 				{
 					Console.Clear();
 					Console.SetCursorPosition(0, 10);
@@ -119,7 +120,7 @@ namespace CEBrainFuck
 
 					Console.WriteLine(new String(' ', programPosition - startPos) + "^");
 					Display();
-					if(validBf.Contains(brainfuck[programPosition])) Console.ReadKey();
+					if(validBf.Contains(brainfuck[programPosition])) Console.ReadLine();
 				}
 
 				if (lastLoopOpen.Count >= 1 && lastLoopOpen[0] == -1 && brainfuck[programPosition] != ']' && brainfuck[programPosition] != '[')
@@ -134,6 +135,9 @@ namespace CEBrainFuck
 						if (pointer < 0) {
 							throw new Exception("Memory underflow. This is not supported");
 						}
+						break;
+					case '|':
+						hasSeenDebugStartFlag = true;
 						break;
 					case '>': // Increase pointer right
 						pointer++;
@@ -168,7 +172,7 @@ namespace CEBrainFuck
 									UseShellExecute = false
 								});
 								currentBashCommand = "";
-								Console.WriteLine("\nStarted process " + currentBashCommand + " in slot " + selectedProcess);
+								//	Console.WriteLine("\nStarted process " + currentBashCommand + " in slot " + selectedProcess);
 								OutputsToProcessIfRunning();
 								memory[0] = 0x0;
 								break;
@@ -186,6 +190,7 @@ namespace CEBrainFuck
 								break;
 							case 0x5:
 								selectedProcess = memory[pointer];
+								OutputsToProcessIfRunning();
 								break;
 						}
 						// write to stdout
@@ -207,6 +212,7 @@ namespace CEBrainFuck
 						switch(memory[0]) {
 							default:
 								int b = StandardInput.ReadByte();
+								//Console.WriteLine(b);
 								if(b == -1) OutputsToConsole(); // end of stream
 								memory[1] = b == -1 ? (byte)0x1 : (byte)0x0;
 								memory[pointer] = b != -1 ? (byte)b : (byte)0x0;
@@ -222,7 +228,7 @@ namespace CEBrainFuck
 						}
 						break;
 					case '#':
-						Console.WriteLine(memory[0]);
+						//Console.WriteLine(memory[0]);
 						Console.WriteLine("Pointer at " + pointer + " with value " + memory[pointer]);
 						break;
 					

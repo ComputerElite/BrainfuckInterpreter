@@ -6,6 +6,7 @@
 
 #include math.cebf
 #include bash.cebf
+#include int.cebf
 
 ;; jump if equal
 ;; jmp.eq <addressA> <addressB> <label>
@@ -15,6 +16,7 @@ sub $0 $1 $cebf_stdlib_0
 ;; if the result is 0, the values are equal and thus we jump
 jmp.ez $cebf_stdlib_0 $2
 macroend
+
 
 
 
@@ -117,11 +119,73 @@ add $cebf_stdlib_1 $cebf_stdlib_0 $cebf_stdlib_0
 out.r $cebf_stdlib_0
 macroend
 
-;; Computes the result of a division
-;; math.divide_without_remainder <divident_address> <divisor_address> <result_address>
-macro math.divide_without_remainder 3
-cpy $0 $cebf_compiler_0
-cpy $1 $cebf_compiler_1
-raw $cebf_compiler_2 [-]>[-]>[-]<<<<[>[->+>+<<]>>[-<<+>>]<[-<<->>]>>+<<<<]>>
-cpy $cebf_compiler_4 $2
+;; Slow pure CEBF implementation for in.line
+;; in.line_slow <address>
+macro in.line_slow 1
+all cebf_stdlib_in_line__input_pointer 1
+all cebf_stdlib_in_line__new_line 1
+
+set.a $cebf_stdlib_in_line__input_pointer $0
+set.n $cebf_stdlib_in_line__new_line 10
+:cebf_stdlib_in_line__input_loop
+in.c *$cebf_stdlib_in_line__input_pointer
+jmp.eq *$cebf_stdlib_in_line__input_pointer $cebf_stdlib_in_line__new_line cebf_stdlib_in_line__done
+inc $cebf_stdlib_in_line__input_pointer
+jmp cebf_stdlib_in_line__input_loop
+
+:cebf_stdlib_in_line__done
+fre cebf_stdlib_in_line__input_pointer
+fre cebf_stdlib_in_line__new_line
 macroend
+
+;; reads a line into the given address, null terminated
+;; in.line <address>
+macro in.line 1
+raw $0 [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
+macroend
+
+
+#include math.cebf
+;; Converts n int to a string
+;; int.to_string <int> <string_address>
+macro int8.to_string 2
+all cebf_stdlib_int8_to_string__tmp_int 1
+cpy $0 $cebf_stdlib_int8_to_string__tmp_int
+
+all cebf_stdlib_int8_to_string__current_power_of_ten 1
+set.n $cebf_stdlib_int8_to_string__current_power_of_ten 2
+
+all cebf_stdlib_int8_to_string__base 1
+set.n $cebf_stdlib_int8_to_string__base 10
+
+all cebf_stdlib_int8_to_string__current_digit_value 1
+
+all cebf_stdlib_int8_to_string__str_pointer 1
+set.a $cebf_stdlib_int8_to_string__str_pointer $1
+
+all cebf_stdlib_int8_to_string__forty_eight 1
+set.n $cebf_stdlib_int8_to_string__forty_eight 48
+
+:loop
+math.power $cebf_stdlib_int8_to_string__base $cebf_stdlib_int8_to_string__current_power_of_ten $cebf_stdlib_int8_to_string__current_digit_value
+math.divmod $cebf_stdlib_int8_to_string__tmp_int $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__tmp_int
+
+add $cebf_stdlib_int8_to_string__forty_eight $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__current_digit_value
+cpy $cebf_stdlib_int8_to_string__current_digit_value *$cebf_stdlib_int8_to_string__str_pointer
+inc $cebf_stdlib_int8_to_string__str_pointer
+jmp.ez $cebf_stdlib_int8_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
+dec $cebf_stdlib_int8_to_string__current_power_of_ten
+jmp loop
+
+
+:cebf_stdlib_int_to_string__end
+
+fre cebf_stdlib_int8_to_string__tmp_int
+fre cebf_stdlib_int8_to_string__current_power_of_ten
+fre cebf_stdlib_int8_to_string__base
+fre cebf_stdlib_int8_to_string__current_digit_value
+fre cebf_stdlib_int8_to_string__str_pointer
+fre cebf_stdlib_int8_to_string__forty_eight
+macroend
+
+macro 
