@@ -23,8 +23,10 @@ macroend
 ;; Switches to a specified process. Expects raw number as argument
 ;; bash.switch_to_process 
 macro bash.switch_to_process 1
-set.n $cebf_interpreter_0 $0
-wrt.n
+set.n $cebf_compiler_0 $0
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
 macroend
 
 ;; Usage

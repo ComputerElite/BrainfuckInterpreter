@@ -1,5 +1,6 @@
 #seperatestatemachine
 #produceprecompilecebf
+;;#minify
 ;;#commentcode
 #include lib/standard.cebf
 ;;all a 1
@@ -22,27 +23,29 @@ macroend
 macro http.send_response 2
 ;; Send the response code
 wrt.s "HTTP/1.1 "
-out.n $0
-wrt.s "\n"
-wrt.s "Content-Type: text/plain\n"
-wrt.s "Server: ce-brainfuck-http\n"
+wrt.s $0
+wrt.s " OK\r\n"
+wrt.s "Server: brainfuck\r\n"
 all content_length 6 ;; may need to be increased
 string.get_length $content_length $1
+raw $content_length #
 wrt.s "Content-Length: "
 int8.to_string $content_length $content_length
 out.n $content_length
-wrt.s "\n\n"
+wrt.s "\r\nConnection: close\r\n"
+wrt.s "Content-Type: text/plain\r\n"
+wrt.s "\r\n"
 ;; Send the response body
 out.n $1
 ;;
 macroend
-
 ;; Connect with a netcat server
 :handle_new_connection
 ;; Here we recreate the netcat process to accept new requests
 bash.switch_to_process 0
 bash.kill_process
 bash.set_command "nc -lvnp 5000"
+;;bash.set_command "cat >> response.txt"
 bash.start_command_in_buffer
 bash.switch_to_console
 wrt.s "Started netcat listener on port 5000\n"
@@ -50,6 +53,7 @@ bash.switch_to_process 0
 all first_line 100
 ;; First line is connection by netcat, just output it
 in.line $first_line
-output_string_in_console $first_line
-http.send_response 200 $first_line
+;;output_string_in_console $first_line
+set.s $first_line "Hello world!"
+http.send_response "200" $first_line
 ;;First line in http request is method and path

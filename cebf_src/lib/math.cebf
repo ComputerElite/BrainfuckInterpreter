@@ -26,7 +26,8 @@ macroend
 
 
 
-;; Computes the result of a division
+;; From https://esolangs.org/wiki/brainfuck_algorithms
+;; Computes the result of a division with remainder
 ;; math.divide_without_remainder <divident_address> <divisor_address> <div_result_address> <mod_result_address>
 macro math.divmod 4
 cpy $0 $cebf_compiler_0

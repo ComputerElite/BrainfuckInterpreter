@@ -86,7 +86,7 @@ add $cebf_stdlib_3 $cebf_stdlib_2 $cebf_stdlib_3 ;; pointer in 3 now points to l
 
 set.n $cebf_stdlib_5 0 ;; power of 10
 set.n $cebf_stdlib_6 10 ;; base 10
-set.n $cebf_stdlib_7 48 ;; ascii to digit conversion constant
+set.n $cebf_stdlib_7 48 ;; ascii to digit conversion magic number
 
 :cebf_stdlib_string_to_int__loop
 jmp.ez $cebf_stdlib_2 cebf_stdlib_string_to_int__end
@@ -166,10 +166,20 @@ set.a $cebf_stdlib_int8_to_string__str_pointer $1
 all cebf_stdlib_int8_to_string__forty_eight 1
 set.n $cebf_stdlib_int8_to_string__forty_eight 48
 
+all cebf_stdlib_int8_to_string__has_started 1
+set.n $cebf_stdlib_int8_to_string__has_started 0
+
+:cebf_stdlib_int8_to_string__skip_leading_zeros
+jmp.nz $cebf_stdlib_int8_to_string__has_started cebf_stdlib_int8_to_string__continue_anyway
+dec $cebf_stdlib_int8_to_string__current_power_of_ten
+
 :loop
 math.power $cebf_stdlib_int8_to_string__base $cebf_stdlib_int8_to_string__current_power_of_ten $cebf_stdlib_int8_to_string__current_digit_value
 math.divmod $cebf_stdlib_int8_to_string__tmp_int $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__tmp_int
+jmp.ez $cebf_stdlib_int8_to_string__current_digit_value cebf_stdlib_int8_to_string__skip_leading_zeros
 
+:cebf_stdlib_int8_to_string__continue_anyway
+set.n $cebf_stdlib_int8_to_string__has_started 1
 add $cebf_stdlib_int8_to_string__forty_eight $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__current_digit_value
 cpy $cebf_stdlib_int8_to_string__current_digit_value *$cebf_stdlib_int8_to_string__str_pointer
 inc $cebf_stdlib_int8_to_string__str_pointer
@@ -187,5 +197,3 @@ fre cebf_stdlib_int8_to_string__current_digit_value
 fre cebf_stdlib_int8_to_string__str_pointer
 fre cebf_stdlib_int8_to_string__forty_eight
 macroend
-
-macro 

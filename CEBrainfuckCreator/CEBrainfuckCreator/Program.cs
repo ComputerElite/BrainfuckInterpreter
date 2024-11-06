@@ -432,7 +432,7 @@ namespace CEBrainfuckCreator
 					case "wrt.s":
 						// writes a string to the output
 						cmds.RemoveAt(0);
-						string s = String.Join(" ", cmds).Replace("\\n", "\n");
+						string s = String.Join(" ", cmds).Replace("\\n", "\n").Replace("\\r", "\r");
 						OutputString(s);
 						break;
 					case "wrt.n":
