@@ -1287,8 +1287,8 @@ namespace CEBrainfuckCreator
 			}
 			List<BrainfuckLine> expanded = content.ConvertAll(x => x.Clone());
 			// find labels
-			// ToDo: Find variables
 			Dictionary<string, string> labels = new Dictionary<string, string>();
+			List<string> variablesThatNeedCallification = new List<string>();
 			for (int i = 0; i < expanded.Count; i++)
 			{
 				if (expanded[i].StartsWith(":"))
@@ -1325,6 +1325,7 @@ namespace CEBrainfuckCreator
 					}
 					if (cmd == "all" && j == 1)
 					{
+						variablesThatNeedCallification.Add("$" + word);
 						expanded[i].content = "all " + Callify(word) + " " + words[j+1];
 						break;
 					}
@@ -1337,11 +1338,13 @@ namespace CEBrainfuckCreator
 					}
 					
 					
-					if (!word.TrimStart('*').StartsWith("$")) continue;
+					string trimmedVar = word.TrimStart('*');
+					if (!trimmedVar.StartsWith("$")) continue;
 					int convertTest;
-					if (int.TryParse(word.TrimStart('*').Substring(1), out convertTest)) continue; // it's an argument
-					if (Program.variables.ContainsKey(word.TrimStart('*').Substring(1))) continue; // is compiler var
+					if (int.TryParse(trimmedVar.Substring(1), out convertTest)) continue; // it's an argument
+					if (Program.variables.ContainsKey(trimmedVar.Substring(1))) continue; // is compiler var
 					if (labels.ContainsKey(word)) continue;
+					if(!variablesThatNeedCallification.Contains(trimmedVar)) continue;
 					labels.Add(word, Callify(word));
 				}
 			}

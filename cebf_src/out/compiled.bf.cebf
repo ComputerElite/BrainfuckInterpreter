@@ -326,18 +326,83 @@
 ;;set💩n $a 5
 ;;int8💩to_string $a $str
 ;;out💩n $str
-all t 1
-all s 6
-set.n $t 10657
+;; Outputs a string at the specified address to the console and then switches back to process outputs
+;; output_string_in_console 💩string_address💩
+;;macro output_string_in_console 1
+;;bash.switch_to_console
+;;out.n $0
+;;bash.switch_to_process 0
+;;macroend
+all content_length 6
+;; response_code is a directly passed string💩 response body a address
+;; http💩send_response 💩response_code💩 💩response_body💩
+;;macro http.send_response 2
+;;;; Send the response code
+;;wrt.s "HTTP/1.1 "
+;;wrt.s $0
+;;wrt.s " OK\r\n"
+;;wrt.s "Server: brainfuck\r\n"
+;;string.get_length $content_length $1
+;;wrt.s "Content-Length: "
+;;uint16.to_string $content_length $content_length
+;;out.n $content_length
+;;wrt.s "\r\nConnection: close\r\n"
+;;wrt.s "Content-Type: text/plain\r\n"
+;;wrt.s "\r\n"
+;;;; Send the response body
+;;out.n $1
+;;;;
+;;macroend
+;; Connect with a netcat server
+:handle_new_connection
+;; Here we recreate the netcat process to accept new requests
+set.n $cebf_compiler_0 0
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+set.n $cebf_interpreter_0 3
+wrt.n
+
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s "nc -lvnp 5000"
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+;;bash💩set_command "cat 💩💩 response💩txt"
+set.n $cebf_interpreter_0 2
+wrt.n
+set.n $cebf_interpreter_0 4
+wrt.s "Started netcat listener on port 5000\n"
+set.n $cebf_compiler_0 0
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+all body 256 ;; 2048 bytes buffer for body
+;; First line is connection by netcat💩 just output it
+raw $body [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
+set.s $body "Brainfuck is really really fun!!!"
+
+wrt.s "HTTP/1.1 "
+wrt.s "200
+wrt.s  OK\r\n
+wrt.s "Server: brainfuck\r\n"
+set.n $content_length 0
+set.a $cebf_stdlib_0 $body
+:cebf_stdlib_string_get_length__loop___call_0
+jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end___call_0
+inc $content_length
+inc $cebf_stdlib_0
+jmp cebf_stdlib_string_get_length__loop___call_0
+:cebf_stdlib_string_get_length__end___call_0
+wrt.s "Content-Length: "
 all cebf_stdlib_uint16_to_string__tmp_int___call_0 1
-cpy $t $cebf_stdlib_uint16_to_string__tmp_int___call_0
+cpy $content_length $cebf_stdlib_uint16_to_string__tmp_int___call_0
 all cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 1
 set.n $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 5
 all cebf_stdlib_uint16_to_string__base___call_0 1
 set.n $cebf_stdlib_uint16_to_string__base___call_0 10
 all cebf_stdlib_uint16_to_string__current_digit_value___call_0 1
 all cebf_stdlib_uint16_to_string__str_pointer___call_0 1
-set.a $cebf_stdlib_uint16_to_string__str_pointer___call_0 $s
+set.a $cebf_stdlib_uint16_to_string__str_pointer___call_0 $content_length
 all cebf_stdlib_uint16_to_string__forty_eight___call_0 1
 set.n $cebf_stdlib_uint16_to_string__forty_eight___call_0 48
 all cebf_stdlib_uint16_to_string__has_started___call_0 1
@@ -375,81 +440,7 @@ fre cebf_stdlib_uint16_to_string__base___call_0
 fre cebf_stdlib_uint16_to_string__current_digit_value___call_0
 fre cebf_stdlib_uint16_to_string__str_pointer___call_0
 fre cebf_stdlib_uint16_to_string__forty_eight___call_0
-out.n $s
-exit
-;; Outputs a string at the specified address to the console and then switches back to process outputs
-;; output_string_in_console 💩string_address💩
-;;macro output_string_in_console 1
-;;bash.switch_to_console
-;;out.n $0
-;;bash.switch_to_process 0
-;;macroend
-;; response_code is a directly passed string💩 response body a address
-;; http💩send_response 💩response_code💩 💩response_body💩
-;;macro http.send_response 2
-;;;; Send the response code
-;;wrt.s "HTTP/1.1 "
-;;wrt.s $0
-;;wrt.s " OK\r\n"
-;;wrt.s "Server: brainfuck\r\n"
-;;all content_length 6 ;; may need to be increased
-;;string.get_length $content_length $1
-;;raw $content_length #
-;;wrt.s "Content-Length: "
-;;int8.to_string $content_length $content_length
-;;out.n $content_length
-;;wrt.s "\r\nConnection: close\r\n"
-;;wrt.s "Content-Type: text/plain\r\n"
-;;wrt.s "\r\n"
-;;;; Send the response body
-;;out.n $1
-;;;;
-;;macroend
-;; Connect with a netcat server
-:handle_new_connection
-;; Here we recreate the netcat process to accept new requests
-set.n $cebf_compiler_0 0
-set.n $cebf_interpreter_0 5
-out.r $cebf_compiler_0
-set.n $cebf_interpreter_0 0
-set.n $cebf_interpreter_0 3
-wrt.n
-
-cpy $cebf_interpreter_0 $cebf_stdlib_0
-set.n $cebf_interpreter_0 1
-wrt.s "nc -lvnp 5000"
-cpy $cebf_stdlib_0 $cebf_interpreter_0
-;;bash💩set_command "cat 💩💩 response💩txt"
-set.n $cebf_interpreter_0 2
-wrt.n
-set.n $cebf_interpreter_0 4
-wrt.s "Started netcat listener on port 5000\n"
-set.n $cebf_compiler_0 0
-set.n $cebf_interpreter_0 5
-out.r $cebf_compiler_0
-set.n $cebf_interpreter_0 0
-all body 2048 ;; 2048 bytes buffer for body
-;; First line is connection by netcat💩 just output it
-raw $body [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
-set.s $body "Hello world!"
-
-wrt.s "HTTP/1.1 "
-wrt.s "200
-wrt.s  OK\r\n
-wrt.s "Server: brainfuck\r\n"
-all content_length___call_0 6
-set.n $content_length___call_0 0
-set.a $cebf_stdlib_0 $body
-:cebf_stdlib_string_get_length__loop___call_0
-jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end___call_0
-inc $content_length___call_0
-inc $cebf_stdlib_0
-jmp cebf_stdlib_string_get_length__loop___call_0
-:cebf_stdlib_string_get_length__end___call_0
-raw $content_length___call_0 #
-wrt.s "Content-Length: "
-int8.to_string $content_length___call_0 $content_length___call_0
-out.n $content_length___call_0
+out.n $content_length
 wrt.s "\r\nConnection: close\r\n"
 wrt.s "Content-Type: text/plain\r\n"
 wrt.s "\r\n
