@@ -57,6 +57,7 @@
 ;; #noomovement             (compiler option) Stop the compiler from optimizing pointer movement
 ;; #seperatestatemachine    (compiler option) Put the state machine into seperate lines from the command
 ;; #produceprecompilecebf   (compiler option) saves a cebf file after including every file and expanding macros. This represents what is actually compiled to brainfuck.
+;; #use32bit                (compiler option) Tells the interpreter to use 32 bit cells
 
 ;; _______STANDARD LIBRARY________
 ;; include the standard library by adding '#include standard.cebf' to the top of your file

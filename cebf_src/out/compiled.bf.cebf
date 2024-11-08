@@ -1,5 +1,6 @@
 #seperatestatemachine
 #produceprecompilecebf
+#cellsize 65535
 ;;💩minify
 ;;💩commentcode
 ;; Standard library for cebf
@@ -243,49 +244,139 @@
 ;;raw $0 [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
 ;;macroend
 ;; Converts n int to a string
-;; int💩to_string 💩int💩 💩string_address💩
-;;macro int8.to_string 2
-;;all cebf_stdlib_int8_to_string__tmp_int 1
-;;cpy $0 $cebf_stdlib_int8_to_string__tmp_int
-;;all cebf_stdlib_int8_to_string__current_power_of_ten 1
-;;set.n $cebf_stdlib_int8_to_string__current_power_of_ten 2
-;;all cebf_stdlib_int8_to_string__base 1
-;;set.n $cebf_stdlib_int8_to_string__base 10
-;;all cebf_stdlib_int8_to_string__current_digit_value 1
-;;all cebf_stdlib_int8_to_string__str_pointer 1
-;;set.a $cebf_stdlib_int8_to_string__str_pointer $1
-;;all cebf_stdlib_int8_to_string__forty_eight 1
-;;set.n $cebf_stdlib_int8_to_string__forty_eight 48
-;;all cebf_stdlib_int8_to_string__has_started 1
-;;set.n $cebf_stdlib_int8_to_string__has_started 0
-;;:cebf_stdlib_int8_to_string__skip_leading_zeros
-;;jmp.nz $cebf_stdlib_int8_to_string__has_started cebf_stdlib_int8_to_string__continue_anyway
-;;dec $cebf_stdlib_int8_to_string__current_power_of_ten
+;; uint8💩to_string 💩int💩 💩string_address💩
+;;macro uint8.to_string 2
+;;all cebf_stdlib_uint8_to_string__tmp_int 1
+;;cpy $0 $cebf_stdlib_uint8_to_string__tmp_int
+;;all cebf_stdlib_uint8_to_string__current_power_of_ten 1
+;;set.n $cebf_stdlib_uint8_to_string__current_power_of_ten 4
+;;all cebf_stdlib_uint8_to_string__base 1
+;;set.n $cebf_stdlib_uint8_to_string__base 10
+;;all cebf_stdlib_uint8_to_string__current_digit_value 1
+;;all cebf_stdlib_uint8_to_string__str_pointer 1
+;;set.a $cebf_stdlib_uint8_to_string__str_pointer $1
+;;all cebf_stdlib_uint8_to_string__forty_eight 1
+;;set.n $cebf_stdlib_uint8_to_string__forty_eight 48
+;;all cebf_stdlib_uint8_to_string__has_started 1
+;;set.n $cebf_stdlib_uint8_to_string__has_started 0
+;;:cebf_stdlib_uint8_to_string__skip_leading_zeros
+;;jmp.nz $cebf_stdlib_uint8_to_string__has_started cebf_stdlib_uint8_to_string__continue_anyway
+;;dec $cebf_stdlib_uint8_to_string__current_power_of_ten
 ;;:loop
-;;math.power $cebf_stdlib_int8_to_string__base $cebf_stdlib_int8_to_string__current_power_of_ten $cebf_stdlib_int8_to_string__current_digit_value
-;;math.divmod $cebf_stdlib_int8_to_string__tmp_int $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__tmp_int
-;;jmp.ez $cebf_stdlib_int8_to_string__current_digit_value cebf_stdlib_int8_to_string__skip_leading_zeros
-;;:cebf_stdlib_int8_to_string__continue_anyway
-;;set.n $cebf_stdlib_int8_to_string__has_started 1
-;;add $cebf_stdlib_int8_to_string__forty_eight $cebf_stdlib_int8_to_string__current_digit_value $cebf_stdlib_int8_to_string__current_digit_value
-;;cpy $cebf_stdlib_int8_to_string__current_digit_value *$cebf_stdlib_int8_to_string__str_pointer
-;;inc $cebf_stdlib_int8_to_string__str_pointer
-;;jmp.ez $cebf_stdlib_int8_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
-;;dec $cebf_stdlib_int8_to_string__current_power_of_ten
+;;math.power $cebf_stdlib_uint8_to_string__base $cebf_stdlib_uint8_to_string__current_power_of_ten $cebf_stdlib_uint8_to_string__current_digit_value
+;;math.divmod $cebf_stdlib_uint8_to_string__tmp_int $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__tmp_int
+;;jmp.ez $cebf_stdlib_uint8_to_string__current_digit_value cebf_stdlib_uint8_to_string__skip_leading_zeros
+;;:cebf_stdlib_uint8_to_string__continue_anyway
+;;set.n $cebf_stdlib_uint8_to_string__has_started 1
+;;add $cebf_stdlib_uint8_to_string__forty_eight $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__current_digit_value
+;;cpy $cebf_stdlib_uint8_to_string__current_digit_value *$cebf_stdlib_uint8_to_string__str_pointer
+;;inc $cebf_stdlib_uint8_to_string__str_pointer
+;;jmp.ez $cebf_stdlib_uint8_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
+;;dec $cebf_stdlib_uint8_to_string__current_power_of_ten
 ;;jmp loop
 ;;:cebf_stdlib_int_to_string__end
-;;fre cebf_stdlib_int8_to_string__tmp_int
-;;fre cebf_stdlib_int8_to_string__current_power_of_ten
-;;fre cebf_stdlib_int8_to_string__base
-;;fre cebf_stdlib_int8_to_string__current_digit_value
-;;fre cebf_stdlib_int8_to_string__str_pointer
-;;fre cebf_stdlib_int8_to_string__forty_eight
+;;fre cebf_stdlib_uint8_to_string__tmp_int
+;;fre cebf_stdlib_uint8_to_string__current_power_of_ten
+;;fre cebf_stdlib_uint8_to_string__base
+;;fre cebf_stdlib_uint8_to_string__current_digit_value
+;;fre cebf_stdlib_uint8_to_string__str_pointer
+;;fre cebf_stdlib_uint8_to_string__forty_eight
+;;macroend
+;; Converts n int to a string
+;; uint16💩to_string 💩int💩 💩string_address💩
+;;macro uint16.to_string 2
+;;all cebf_stdlib_uint16_to_string__tmp_int 1
+;;cpy $0 $cebf_stdlib_uint16_to_string__tmp_int
+;;all cebf_stdlib_uint16_to_string__current_power_of_ten 1
+;;set.n $cebf_stdlib_uint16_to_string__current_power_of_ten 5
+;;all cebf_stdlib_uint16_to_string__base 1
+;;set.n $cebf_stdlib_uint16_to_string__base 10
+;;all cebf_stdlib_uint16_to_string__current_digit_value 1
+;;all cebf_stdlib_uint16_to_string__str_pointer 1
+;;set.a $cebf_stdlib_uint16_to_string__str_pointer $1
+;;all cebf_stdlib_uint16_to_string__forty_eight 1
+;;set.n $cebf_stdlib_uint16_to_string__forty_eight 48
+;;all cebf_stdlib_uint16_to_string__has_started 1
+;;set.n $cebf_stdlib_uint16_to_string__has_started 0
+;;:cebf_stdlib_uint16_to_string__skip_leading_zeros
+;;jmp.nz $cebf_stdlib_uint16_to_string__has_started cebf_stdlib_uint16_to_string__continue_anyway
+;;dec $cebf_stdlib_uint16_to_string__current_power_of_ten
+;;:loop
+;;math.power $cebf_stdlib_uint16_to_string__base $cebf_stdlib_uint16_to_string__current_power_of_ten $cebf_stdlib_uint16_to_string__current_digit_value
+;;math.divmod $cebf_stdlib_uint16_to_string__tmp_int $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__tmp_int
+;;jmp.ez $cebf_stdlib_uint16_to_string__current_digit_value cebf_stdlib_uint16_to_string__skip_leading_zeros
+;;:cebf_stdlib_uint16_to_string__continue_anyway
+;;set.n $cebf_stdlib_uint16_to_string__has_started 1
+;;add $cebf_stdlib_uint16_to_string__forty_eight $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__current_digit_value
+;;cpy $cebf_stdlib_uint16_to_string__current_digit_value *$cebf_stdlib_uint16_to_string__str_pointer
+;;inc $cebf_stdlib_uint16_to_string__str_pointer
+;;jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
+;;dec $cebf_stdlib_uint16_to_string__current_power_of_ten
+;;jmp loop
+;;:cebf_stdlib_int_to_string__end
+;;fre cebf_stdlib_uint16_to_string__tmp_int
+;;fre cebf_stdlib_uint16_to_string__current_power_of_ten
+;;fre cebf_stdlib_uint16_to_string__base
+;;fre cebf_stdlib_uint16_to_string__current_digit_value
+;;fre cebf_stdlib_uint16_to_string__str_pointer
+;;fre cebf_stdlib_uint16_to_string__forty_eight
 ;;macroend
 ;;all a 1
 ;;all str 3
 ;;set💩n $a 5
 ;;int8💩to_string $a $str
 ;;out💩n $str
+all t 1
+all s 6
+set.n $t 10657
+all cebf_stdlib_uint16_to_string__tmp_int___call_0 1
+cpy $t $cebf_stdlib_uint16_to_string__tmp_int___call_0
+all cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 1
+set.n $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 5
+all cebf_stdlib_uint16_to_string__base___call_0 1
+set.n $cebf_stdlib_uint16_to_string__base___call_0 10
+all cebf_stdlib_uint16_to_string__current_digit_value___call_0 1
+all cebf_stdlib_uint16_to_string__str_pointer___call_0 1
+set.a $cebf_stdlib_uint16_to_string__str_pointer___call_0 $s
+all cebf_stdlib_uint16_to_string__forty_eight___call_0 1
+set.n $cebf_stdlib_uint16_to_string__forty_eight___call_0 48
+all cebf_stdlib_uint16_to_string__has_started___call_0 1
+set.n $cebf_stdlib_uint16_to_string__has_started___call_0 0
+:cebf_stdlib_uint16_to_string__skip_leading_zeros___call_0
+jmp.nz $cebf_stdlib_uint16_to_string__has_started___call_0 cebf_stdlib_uint16_to_string__continue_anyway___call_0
+dec $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0
+:loop___call_0
+set.n $cebf_stdlib_uint16_to_string__current_digit_value___call_0 1
+cpy $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 $cebf_stdlib_1
+:cebf_stdlib_math_power__loop___call_0
+jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end___call_0
+mpl $cebf_stdlib_uint16_to_string__base___call_0 $cebf_stdlib_uint16_to_string__current_digit_value___call_0 $cebf_stdlib_uint16_to_string__current_digit_value___call_0
+dec $cebf_stdlib_1
+jmp cebf_stdlib_math_power__loop___call_0
+:cebf_stdlib_math_power__end___call_0
+cpy $cebf_stdlib_uint16_to_string__tmp_int___call_0 $cebf_compiler_0
+cpy $cebf_stdlib_uint16_to_string__current_digit_value___call_0 $cebf_compiler_1
+raw $cebf_compiler_0 >>[-]>[-]<<<[->[->+>>]>[<<+>>[-<+>]>+>>]<<<<<]>[>>>]>[[-<+>]>+>>]<<<<<
+cpy $cebf_compiler_3 $cebf_stdlib_uint16_to_string__current_digit_value___call_0
+cpy $cebf_compiler_2 $cebf_stdlib_uint16_to_string__tmp_int___call_0
+jmp.ez $cebf_stdlib_uint16_to_string__current_digit_value___call_0 cebf_stdlib_uint16_to_string__skip_leading_zeros___call_0
+:cebf_stdlib_uint16_to_string__continue_anyway___call_0
+set.n $cebf_stdlib_uint16_to_string__has_started___call_0 1
+add $cebf_stdlib_uint16_to_string__forty_eight___call_0 $cebf_stdlib_uint16_to_string__current_digit_value___call_0 $cebf_stdlib_uint16_to_string__current_digit_value___call_0
+cpy $cebf_stdlib_uint16_to_string__current_digit_value___call_0 *$cebf_stdlib_uint16_to_string__str_pointer___call_0
+inc $cebf_stdlib_uint16_to_string__str_pointer___call_0
+jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 cebf_stdlib_int_to_string__end___call_0
+dec $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0
+jmp loop___call_0
+:cebf_stdlib_int_to_string__end___call_0
+fre cebf_stdlib_uint16_to_string__tmp_int___call_0
+fre cebf_stdlib_uint16_to_string__current_power_of_ten___call_0
+fre cebf_stdlib_uint16_to_string__base___call_0
+fre cebf_stdlib_uint16_to_string__current_digit_value___call_0
+fre cebf_stdlib_uint16_to_string__str_pointer___call_0
+fre cebf_stdlib_uint16_to_string__forty_eight___call_0
+out.n $s
+exit
 ;; Outputs a string at the specified address to the console and then switches back to process outputs
 ;; output_string_in_console 💩string_address💩
 ;;macro output_string_in_console 1
@@ -337,11 +428,10 @@ set.n $cebf_compiler_0 0
 set.n $cebf_interpreter_0 5
 out.r $cebf_compiler_0
 set.n $cebf_interpreter_0 0
-all first_line 100
+all body 2048 ;; 2048 bytes buffer for body
 ;; First line is connection by netcat💩 just output it
-raw $first_line [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
-;;output_string_in_console $first_line
-set.s $first_line "Hello world!"
+raw $body [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
+set.s $body "Hello world!"
 
 wrt.s "HTTP/1.1 "
 wrt.s "200
@@ -349,7 +439,7 @@ wrt.s  OK\r\n
 wrt.s "Server: brainfuck\r\n"
 all content_length___call_0 6
 set.n $content_length___call_0 0
-set.a $cebf_stdlib_0 $first_line
+set.a $cebf_stdlib_0 $body
 :cebf_stdlib_string_get_length__loop___call_0
 jmp.ez *$cebf_stdlib_0 cebf_stdlib_string_get_length__end___call_0
 inc $content_length___call_0
@@ -358,57 +448,10 @@ jmp cebf_stdlib_string_get_length__loop___call_0
 :cebf_stdlib_string_get_length__end___call_0
 raw $content_length___call_0 #
 wrt.s "Content-Length: "
-all cebf_stdlib_int8_to_string__tmp_int___call_0 1
-cpy $content_length___call_0 $cebf_stdlib_int8_to_string__tmp_int___call_0
-all cebf_stdlib_int8_to_string__current_power_of_ten___call_0 1
-set.n $cebf_stdlib_int8_to_string__current_power_of_ten___call_0 2
-all cebf_stdlib_int8_to_string__base___call_0 1
-set.n $cebf_stdlib_int8_to_string__base___call_0 10
-all cebf_stdlib_int8_to_string__current_digit_value___call_0 1
-all cebf_stdlib_int8_to_string__str_pointer___call_0 1
-set.a $cebf_stdlib_int8_to_string__str_pointer___call_0 $content_length___call_0
-all cebf_stdlib_int8_to_string__forty_eight___call_0 1
-set.n $cebf_stdlib_int8_to_string__forty_eight___call_0 48
-all cebf_stdlib_int8_to_string__has_started___call_0 1
-set.n $cebf_stdlib_int8_to_string__has_started___call_0 0
-:cebf_stdlib_int8_to_string__skip_leading_zeros___call_0
-jmp.nz $cebf_stdlib_int8_to_string__has_started___call_0 cebf_stdlib_int8_to_string__continue_anyway___call_0
-dec $cebf_stdlib_int8_to_string__current_power_of_ten___call_0
-:loop___call_0
-set.n $cebf_stdlib_int8_to_string__current_digit_value___call_0 1
-cpy $cebf_stdlib_int8_to_string__current_power_of_ten___call_0 $cebf_stdlib_1
-:cebf_stdlib_math_power__loop___call_0
-jmp.ez $cebf_stdlib_1 cebf_stdlib_math_power__end___call_0
-mpl $cebf_stdlib_int8_to_string__base___call_0 $cebf_stdlib_int8_to_string__current_digit_value___call_0 $cebf_stdlib_int8_to_string__current_digit_value___call_0
-dec $cebf_stdlib_1
-jmp cebf_stdlib_math_power__loop___call_0
-:cebf_stdlib_math_power__end___call_0
-cpy $cebf_stdlib_int8_to_string__tmp_int___call_0 $cebf_compiler_0
-cpy $cebf_stdlib_int8_to_string__current_digit_value___call_0 $cebf_compiler_1
-raw $cebf_compiler_0 >>[-]>[-]<<<[->[->+>>]>[<<+>>[-<+>]>+>>]<<<<<]>[>>>]>[[-<+>]>+>>]<<<<<
-cpy $cebf_compiler_3 $cebf_stdlib_int8_to_string__current_digit_value___call_0
-cpy $cebf_compiler_2 $cebf_stdlib_int8_to_string__tmp_int___call_0
-jmp.ez $cebf_stdlib_int8_to_string__current_digit_value___call_0 cebf_stdlib_int8_to_string__skip_leading_zeros___call_0
-:cebf_stdlib_int8_to_string__continue_anyway___call_0
-set.n $cebf_stdlib_int8_to_string__has_started___call_0 1
-add $cebf_stdlib_int8_to_string__forty_eight___call_0 $cebf_stdlib_int8_to_string__current_digit_value___call_0 $cebf_stdlib_int8_to_string__current_digit_value___call_0
-cpy $cebf_stdlib_int8_to_string__current_digit_value___call_0 *$cebf_stdlib_int8_to_string__str_pointer___call_0
-inc $cebf_stdlib_int8_to_string__str_pointer___call_0
-jmp.ez $cebf_stdlib_int8_to_string__current_power_of_ten___call_0 cebf_stdlib_int_to_string__end___call_0
-dec $cebf_stdlib_int8_to_string__current_power_of_ten___call_0
-jmp loop___call_0
-:cebf_stdlib_int_to_string__end___call_0
-fre cebf_stdlib_int8_to_string__tmp_int___call_0
-fre cebf_stdlib_int8_to_string__current_power_of_ten___call_0
-fre cebf_stdlib_int8_to_string__base___call_0
-fre cebf_stdlib_int8_to_string__current_digit_value___call_0
-fre cebf_stdlib_int8_to_string__str_pointer___call_0
-fre cebf_stdlib_int8_to_string__forty_eight___call_0
+int8.to_string $content_length___call_0 $content_length___call_0
 out.n $content_length___call_0
 wrt.s "\r\nConnection: close\r\n"
 wrt.s "Content-Type: text/plain\r\n"
 wrt.s "\r\n
 
-out.n $first_line
-
-;;First line in http request is method and path
+out.n $body

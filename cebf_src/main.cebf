@@ -1,5 +1,6 @@
 #seperatestatemachine
 #produceprecompilecebf
+#cellsize 65535
 ;;#minify
 ;;#commentcode
 #include lib/standard.cebf
@@ -9,6 +10,12 @@
 ;;int8.to_string $a $str
 ;;out.n $str
 
+all t 1
+all s 6
+set.n $t 10657
+uint16.to_string $t $s
+out.n $s
+exit
 ;; Outputs a string at the specified address to the console and then switches back to process outputs
 ;; output_string_in_console <string_address>
 macro output_string_in_console 1
@@ -50,10 +57,8 @@ bash.start_command_in_buffer
 bash.switch_to_console
 wrt.s "Started netcat listener on port 5000\n"
 bash.switch_to_process 0
-all first_line 100
+all body 2048 ;; 2048 bytes buffer for body
 ;; First line is connection by netcat, just output it
-in.line $first_line
-;;output_string_in_console $first_line
-set.s $first_line "Hello world!"
-http.send_response "200" $first_line
-;;First line in http request is method and path
+in.line $body
+set.s $body "Hello world!"
+http.send_response "200" $body

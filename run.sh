@@ -1,1 +1,1 @@
-dotnet CEBrainfuckInterpreter/CEBrainfuckInterpreter/bin/Debug/net6.0/CEBrainfuckInterpreter.dll cebf_src/out/compiled.bf
+dotnet CEBrainfuckInterpreter/CEBrainfuckInterpreter/bin/Debug/net8.0/CEBrainfuckInterpreter.dll cebf_src/out/compiled.bf

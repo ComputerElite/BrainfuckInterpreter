@@ -22,6 +22,8 @@ namespace CEBrainfuckCreator
 		public static bool minify;
 		public static bool oMovement;
 		public static bool seperateStateMachine;
+		public static bool use32Bit;
+		public static uint cellSize = 255;
 		public const string allowedChars = "<>+\\-\\[\\].,#";
 		public static Dictionary<string, int> labels = new Dictionary<string, int>();
 		public static Dictionary<string, BrainfuckMacro> macros = new Dictionary<string, BrainfuckMacro>();
@@ -144,6 +146,16 @@ namespace CEBrainfuckCreator
 
 			BrainfuckAddress instructionPointerAddress = GetBFCompilerMemoryAddress(instructionPointerAddressInt);
 			bfReal = "timeout:1000\n";
+			if(lines.Any(x => x.ToLower().StartsWith("#cellsize"))) 
+			{
+				BrainfuckLine cellSizeLine = lines.First(x => x.ToLower().StartsWith("#cellsize"));
+				try {
+					cellSize = uint.Parse(cellSizeLine.Split(' ')[1]);
+					bfReal += cellSizeLine + "\n";
+				} catch(Exception e) {
+					Warning(lines.IndexOf(cellSizeLine), "Couldn't extract cell size");
+				}
+			}
 			// reserve first 10 memory addresses for variables of the compiler
 			bfReal += ">>  ;; Reserve bf interpreter memory space\n";
 			AssignVariable("cebf_interpreter_0", GetBFCompilerMemoryAddress(-2));
@@ -324,7 +336,7 @@ namespace CEBrainfuckCreator
 						nextInstruction = instructionCounter;
 						break;
 					case "exit":
-						bf += new string('+', GetInstructionDiff(instructionCounter, lines.Count - 1));
+						bf += new string('+', GetInstructionDiff(instructionCounter, totalInstructionCount-1));
 						nextInstruction = instructionCounter;
 						break;
 					case "sad":
@@ -686,11 +698,11 @@ namespace CEBrainfuckCreator
 					1; // Warning: I do not know why I have to add 1 here so this may screw me over
 			}
 			if(commentCode) bfReal += ";; Instruction diff: " + instructionDiff + "    next: " + nextInstruction + "     counter: " + instructionCounter + "\n";
-			if (instructionDiff > 255)
+			if (instructionDiff > cellSize)
 			{
 				Warning(currentLine,
 					"Instruction pointer set to " + instructionDiff +
-					". As this is greater than 255 the wrong instruction will execute if your interpreter uses memory cells with an 8 bit value.");
+					". As this is greater than "  + cellSize + " (the currently selected cell size) the wrong instruction will execute if your interpreter uses memory cells <= " + ((int)Math.Log2(cellSize)) + " bits.");
 			}
 			return instructionDiff;
 		}

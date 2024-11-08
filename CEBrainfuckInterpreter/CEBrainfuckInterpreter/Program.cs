@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CEBrainFuck
 {
 	public class CEBrainfuckInterpreter
 	{
-		static byte[] memory = new byte[0xFFFF];
+		static uint[] memory = new uint[0xFFFF];
+		static uint maxCellSize = 255;
 		static int pointer = 0;
 		static int programPosition = 0;
 		static List<int> lastLoopOpen = new List<int>();
@@ -96,6 +98,16 @@ namespace CEBrainFuck
 				}
 			}
 			brainfuck = brainfuck.Replace("\t", "");
+       		// Match the pattern in the input string
+			Match match = Regex.Match(brainfuck, @"#cellsize (\d+)");
+
+			// Check if a match is found
+			if (match.Success)
+			{
+				// Extract the number after #cellsize
+				maxCellSize = uint.Parse(match.Groups[1].Value);
+				Console.WriteLine($"Cell size: {maxCellSize}");
+			}
 			//Console.Clear();
 
 			string currentBashCommand = "";
@@ -148,16 +160,18 @@ namespace CEBrainFuck
 						break;
 					case '+': // Increase value
 						memory[pointer]++;
+						if(memory[pointer] > maxCellSize) memory[pointer] = 0;
 						break;
 					case '-': // Decrease value
 						memory[pointer]--;
+						if(memory[pointer] > maxCellSize) memory[pointer] = maxCellSize;
 						break;
 					case '.': // Write memory to console
 						//Console.WriteLine("\n" + memory[0]);
 						switch (memory[0])
 						{
 							case 0x0: // write to stdout (aka process if it's there
-								StandardOutput.WriteByte(memory[pointer]);
+								StandardOutput.WriteByte((byte)memory[pointer]);
 								break;
 							case 0x1: // append to bash command buffer
 								currentBashCommand += (char)memory[pointer];
@@ -186,10 +200,10 @@ namespace CEBrainFuck
 								memory[0] = 0x0;
 								break;
 							case 0x4: // Output to console
-								ConsoleStandardOutput.WriteByte(memory[pointer]);
+								ConsoleStandardOutput.WriteByte((byte)memory[pointer]);
 								break;
 							case 0x5:
-								selectedProcess = memory[pointer];
+								selectedProcess = (byte)memory[pointer];
 								OutputsToProcessIfRunning();
 								break;
 						}
