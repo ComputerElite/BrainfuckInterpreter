@@ -244,7 +244,7 @@
 ;;raw $0 [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
 ;;macroend
 ;; Converts n int to a string
-;; uint8💩to_string 💩int💩 💩string_address💩
+;; uint8💩to_string 💩int_address💩 💩string_address💩
 ;;macro uint8.to_string 2
 ;;all cebf_stdlib_uint8_to_string__tmp_int 1
 ;;cpy $0 $cebf_stdlib_uint8_to_string__tmp_int
@@ -262,7 +262,7 @@
 ;;:cebf_stdlib_uint8_to_string__skip_leading_zeros
 ;;jmp.nz $cebf_stdlib_uint8_to_string__has_started cebf_stdlib_uint8_to_string__continue_anyway
 ;;dec $cebf_stdlib_uint8_to_string__current_power_of_ten
-;;:loop
+;;:cebf_stdlib_uint8_to_string__loop
 ;;math.power $cebf_stdlib_uint8_to_string__base $cebf_stdlib_uint8_to_string__current_power_of_ten $cebf_stdlib_uint8_to_string__current_digit_value
 ;;math.divmod $cebf_stdlib_uint8_to_string__tmp_int $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__tmp_int
 ;;jmp.ez $cebf_stdlib_uint8_to_string__current_digit_value cebf_stdlib_uint8_to_string__skip_leading_zeros
@@ -271,10 +271,10 @@
 ;;add $cebf_stdlib_uint8_to_string__forty_eight $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__current_digit_value
 ;;cpy $cebf_stdlib_uint8_to_string__current_digit_value *$cebf_stdlib_uint8_to_string__str_pointer
 ;;inc $cebf_stdlib_uint8_to_string__str_pointer
-;;jmp.ez $cebf_stdlib_uint8_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
+;;jmp.ez $cebf_stdlib_uint8_to_string__current_power_of_ten cebf_stdlib_uint8_to_string__end
 ;;dec $cebf_stdlib_uint8_to_string__current_power_of_ten
-;;jmp loop
-;;:cebf_stdlib_int_to_string__end
+;;jmp cebf_stdlib_uint8_to_string__loop
+;;:cebf_stdlib_uint8_to_string__end
 ;;fre cebf_stdlib_uint8_to_string__tmp_int
 ;;fre cebf_stdlib_uint8_to_string__current_power_of_ten
 ;;fre cebf_stdlib_uint8_to_string__base
@@ -301,7 +301,7 @@
 ;;:cebf_stdlib_uint16_to_string__skip_leading_zeros
 ;;jmp.nz $cebf_stdlib_uint16_to_string__has_started cebf_stdlib_uint16_to_string__continue_anyway
 ;;dec $cebf_stdlib_uint16_to_string__current_power_of_ten
-;;:loop
+;;:cebf_stdlib_uint16_to_string__loop
 ;;math.power $cebf_stdlib_uint16_to_string__base $cebf_stdlib_uint16_to_string__current_power_of_ten $cebf_stdlib_uint16_to_string__current_digit_value
 ;;math.divmod $cebf_stdlib_uint16_to_string__tmp_int $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__tmp_int
 ;;jmp.ez $cebf_stdlib_uint16_to_string__current_digit_value cebf_stdlib_uint16_to_string__skip_leading_zeros
@@ -310,10 +310,10 @@
 ;;add $cebf_stdlib_uint16_to_string__forty_eight $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__current_digit_value
 ;;cpy $cebf_stdlib_uint16_to_string__current_digit_value *$cebf_stdlib_uint16_to_string__str_pointer
 ;;inc $cebf_stdlib_uint16_to_string__str_pointer
-;;jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
+;;jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten cebf_stdlib_uint16_to_string__end
 ;;dec $cebf_stdlib_uint16_to_string__current_power_of_ten
-;;jmp loop
-;;:cebf_stdlib_int_to_string__end
+;;jmp cebf_stdlib_uint16_to_string__loop
+;;:cebf_stdlib_uint16_to_string__end
 ;;fre cebf_stdlib_uint16_to_string__tmp_int
 ;;fre cebf_stdlib_uint16_to_string__current_power_of_ten
 ;;fre cebf_stdlib_uint16_to_string__base
@@ -350,7 +350,8 @@ all content_length 6
 ;;wrt.s "Content-Type: text/plain\r\n"
 ;;wrt.s "\r\n"
 ;;;; Send the response body
-;;out.n $1
+;;out.n $body
+;;all empty_line 2
 ;;;;
 ;;macroend
 ;; Connect with a netcat server
@@ -376,9 +377,64 @@ set.n $cebf_compiler_0 0
 set.n $cebf_interpreter_0 5
 out.r $cebf_compiler_0
 set.n $cebf_interpreter_0 0
-all body 256 ;; 2048 bytes buffer for body
-;; First line is connection by netcat💩 just output it
-raw $body [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
+all http_header 128 ;; 2048 bytes buffer for body
+all http_method 6
+all http_path 32
+all read_pointer 1
+all write_pointer 1
+all space 1
+all body 128
+set.n $space 32
+set.a $write_pointer $http_method
+set.a $read_pointer $http_header
+raw $http_header [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
+set.n $cebf_interpreter_0 4
+;; Read first line and extract method and path
+;; Consume the next character from the read pointer and copies it to the write pointer until space is hit
+;; consume_until_space
+;;macro consume_until_space 0
+;;:consume_until_space__loop
+;;jmp.eq *$read_pointer $space consume_until_space__end
+;;cpy *$read_pointer *$write_pointer
+;;inc $read_pointer
+;;inc $write_pointer
+;;jmp consume_until_space__loop
+;;:consume_until_space__end
+;;macroend
+:consume_until_space__loop___call_0
+
+sub *$read_pointer $space $cebf_stdlib_0
+
+jmp.ez $cebf_stdlib_0 consume_until_space__end___call_0
+cpy *$read_pointer *$write_pointer
+inc $read_pointer
+inc $write_pointer
+jmp consume_until_space__loop___call_0
+:consume_until_space__end___call_0
+inc $read_pointer
+set.a $write_pointer $http_path
+:consume_until_space__loop___call_1
+
+sub *$read_pointer $space $cebf_stdlib_0
+
+jmp.ez $cebf_stdlib_0 consume_until_space__end___call_1
+cpy *$read_pointer *$write_pointer
+inc $read_pointer
+inc $write_pointer
+jmp consume_until_space__loop___call_1
+:consume_until_space__end___call_1
+out.n $http_method
+wrt.s \n
+out.n $http_path
+jmp handle_default
+:handle_default
+set.s $body "This path hasn't been found"
+jmp send_body
+:send_body
+set.n $cebf_compiler_0 0
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
 set.s $body "Brainfuck is really really fun!!!"
 
 wrt.s "HTTP/1.1 "
@@ -410,7 +466,7 @@ set.n $cebf_stdlib_uint16_to_string__has_started___call_0 0
 :cebf_stdlib_uint16_to_string__skip_leading_zeros___call_0
 jmp.nz $cebf_stdlib_uint16_to_string__has_started___call_0 cebf_stdlib_uint16_to_string__continue_anyway___call_0
 dec $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0
-:loop___call_0
+:cebf_stdlib_uint16_to_string__loop___call_0
 set.n $cebf_stdlib_uint16_to_string__current_digit_value___call_0 1
 cpy $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 $cebf_stdlib_1
 :cebf_stdlib_math_power__loop___call_0
@@ -430,10 +486,10 @@ set.n $cebf_stdlib_uint16_to_string__has_started___call_0 1
 add $cebf_stdlib_uint16_to_string__forty_eight___call_0 $cebf_stdlib_uint16_to_string__current_digit_value___call_0 $cebf_stdlib_uint16_to_string__current_digit_value___call_0
 cpy $cebf_stdlib_uint16_to_string__current_digit_value___call_0 *$cebf_stdlib_uint16_to_string__str_pointer___call_0
 inc $cebf_stdlib_uint16_to_string__str_pointer___call_0
-jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 cebf_stdlib_int_to_string__end___call_0
+jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0 cebf_stdlib_uint16_to_string__end___call_0
 dec $cebf_stdlib_uint16_to_string__current_power_of_ten___call_0
-jmp loop___call_0
-:cebf_stdlib_int_to_string__end___call_0
+jmp cebf_stdlib_uint16_to_string__loop___call_0
+:cebf_stdlib_uint16_to_string__end___call_0
 fre cebf_stdlib_uint16_to_string__tmp_int___call_0
 fre cebf_stdlib_uint16_to_string__current_power_of_ten___call_0
 fre cebf_stdlib_uint16_to_string__base___call_0
@@ -446,3 +502,4 @@ wrt.s "Content-Type: text/plain\r\n"
 wrt.s "\r\n
 
 out.n $body
+all empty_line___call_0 2

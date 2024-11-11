@@ -146,7 +146,7 @@ macroend
 
 
 ;; Converts n int to a string
-;; uint8.to_string <int> <string_address>
+;; uint8.to_string <int_address> <string_address>
 macro uint8.to_string 2
 all cebf_stdlib_uint8_to_string__tmp_int 1
 cpy $0 $cebf_stdlib_uint8_to_string__tmp_int
@@ -172,7 +172,7 @@ set.n $cebf_stdlib_uint8_to_string__has_started 0
 jmp.nz $cebf_stdlib_uint8_to_string__has_started cebf_stdlib_uint8_to_string__continue_anyway
 dec $cebf_stdlib_uint8_to_string__current_power_of_ten
 
-:loop
+:cebf_stdlib_uint8_to_string__loop
 math.power $cebf_stdlib_uint8_to_string__base $cebf_stdlib_uint8_to_string__current_power_of_ten $cebf_stdlib_uint8_to_string__current_digit_value
 math.divmod $cebf_stdlib_uint8_to_string__tmp_int $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__tmp_int
 jmp.ez $cebf_stdlib_uint8_to_string__current_digit_value cebf_stdlib_uint8_to_string__skip_leading_zeros
@@ -182,12 +182,12 @@ set.n $cebf_stdlib_uint8_to_string__has_started 1
 add $cebf_stdlib_uint8_to_string__forty_eight $cebf_stdlib_uint8_to_string__current_digit_value $cebf_stdlib_uint8_to_string__current_digit_value
 cpy $cebf_stdlib_uint8_to_string__current_digit_value *$cebf_stdlib_uint8_to_string__str_pointer
 inc $cebf_stdlib_uint8_to_string__str_pointer
-jmp.ez $cebf_stdlib_uint8_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
+jmp.ez $cebf_stdlib_uint8_to_string__current_power_of_ten cebf_stdlib_uint8_to_string__end
 dec $cebf_stdlib_uint8_to_string__current_power_of_ten
-jmp loop
+jmp cebf_stdlib_uint8_to_string__loop
 
 
-:cebf_stdlib_int_to_string__end
+:cebf_stdlib_uint8_to_string__end
 
 fre cebf_stdlib_uint8_to_string__tmp_int
 fre cebf_stdlib_uint8_to_string__current_power_of_ten
@@ -224,7 +224,7 @@ set.n $cebf_stdlib_uint16_to_string__has_started 0
 jmp.nz $cebf_stdlib_uint16_to_string__has_started cebf_stdlib_uint16_to_string__continue_anyway
 dec $cebf_stdlib_uint16_to_string__current_power_of_ten
 
-:loop
+:cebf_stdlib_uint16_to_string__loop
 math.power $cebf_stdlib_uint16_to_string__base $cebf_stdlib_uint16_to_string__current_power_of_ten $cebf_stdlib_uint16_to_string__current_digit_value
 math.divmod $cebf_stdlib_uint16_to_string__tmp_int $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__tmp_int
 jmp.ez $cebf_stdlib_uint16_to_string__current_digit_value cebf_stdlib_uint16_to_string__skip_leading_zeros
@@ -234,12 +234,12 @@ set.n $cebf_stdlib_uint16_to_string__has_started 1
 add $cebf_stdlib_uint16_to_string__forty_eight $cebf_stdlib_uint16_to_string__current_digit_value $cebf_stdlib_uint16_to_string__current_digit_value
 cpy $cebf_stdlib_uint16_to_string__current_digit_value *$cebf_stdlib_uint16_to_string__str_pointer
 inc $cebf_stdlib_uint16_to_string__str_pointer
-jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten cebf_stdlib_int_to_string__end
+jmp.ez $cebf_stdlib_uint16_to_string__current_power_of_ten cebf_stdlib_uint16_to_string__end
 dec $cebf_stdlib_uint16_to_string__current_power_of_ten
-jmp loop
+jmp cebf_stdlib_uint16_to_string__loop
 
 
-:cebf_stdlib_int_to_string__end
+:cebf_stdlib_uint16_to_string__end
 
 fre cebf_stdlib_uint16_to_string__tmp_int
 fre cebf_stdlib_uint16_to_string__current_power_of_ten

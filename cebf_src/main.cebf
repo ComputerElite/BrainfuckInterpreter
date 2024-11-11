@@ -38,7 +38,10 @@ wrt.s "\r\nConnection: close\r\n"
 wrt.s "Content-Type: text/plain\r\n"
 wrt.s "\r\n"
 ;; Send the response body
-out.n $1
+out.n $body
+
+all empty_line 2
+
 ;;
 macroend
 ;; Connect with a netcat server
@@ -52,8 +55,48 @@ bash.start_command_in_buffer
 bash.switch_to_console
 wrt.s "Started netcat listener on port 5000\n"
 bash.switch_to_process 0
-all body 256 ;; 2048 bytes buffer for body
-;; First line is connection by netcat, just output it
-in.line $body
+all http_header 128 ;; 2048 bytes buffer for body
+all http_method 6
+all http_path 32
+all read_pointer 1
+all write_pointer 1
+all space 1
+all body 128
+set.n $space 32
+set.a $write_pointer $http_method
+set.a $read_pointer $http_header
+in.line $http_header
+
+bash.switch_to_console
+;; Read first line and extract method and path
+
+;; Consume the next character from the read pointer and copies it to the write pointer until space is hit
+;; consume_until_space
+macro consume_until_space 0
+:consume_until_space__loop
+jmp.eq *$read_pointer $space consume_until_space__end
+cpy *$read_pointer *$write_pointer
+inc $read_pointer
+inc $write_pointer
+jmp consume_until_space__loop
+:consume_until_space__end
+macroend
+
+
+consume_until_space
+inc $read_pointer
+set.a $write_pointer $http_path
+consume_until_space
+out.n $http_method
+wrt.s \n
+out.n $http_path
+jmp handle_default
+
+:handle_default
+set.s $body "This path hasn't been found"
+jmp send_body
+
+:send_body
+bash.switch_to_process 0
 set.s $body "Brainfuck is really really fun!!!"
 http.send_response "200" $body

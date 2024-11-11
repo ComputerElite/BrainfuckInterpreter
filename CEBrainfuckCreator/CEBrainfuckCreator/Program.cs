@@ -37,6 +37,7 @@ namespace CEBrainfuckCreator
 			}
 			catch (Exception e)
 			{
+				Error(currentLine, "Error during compilation, check above for more info");
 				Console.WriteLine("Error during compilation, check above for more info " + e.ToString());
 			}
 		}
