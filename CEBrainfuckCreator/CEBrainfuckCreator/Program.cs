@@ -24,7 +24,7 @@ namespace CEBrainfuckCreator
 		public static bool seperateStateMachine;
 		public static bool use32Bit;
 		public static uint cellSize = 255;
-		public const string allowedChars = "<>+\\-\\[\\].,#";
+		public const string allowedChars = "<>+\\-\\[\\].,#|";
 		public static Dictionary<string, int> labels = new Dictionary<string, int>();
 		public static Dictionary<string, BrainfuckMacro> macros = new Dictionary<string, BrainfuckMacro>();
 		public static int totalInstructionCount = 0;

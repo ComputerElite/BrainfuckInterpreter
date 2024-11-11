@@ -114,7 +114,7 @@ namespace CEBrainFuck
 			bool hasSeenDebugStartFlag = false;
 			while (programPosition < brainfuck.Length)
 			{
-				if (args.Length >= 2 && args[1] == "debug" || input == "DEBUG" && hasSeenDebugStartFlag)
+				if ((args.Length >= 2 && args[1] == "debug" || input == "DEBUG") && hasSeenDebugStartFlag)
 				{
 					Console.Clear();
 					Console.SetCursorPosition(0, 10);

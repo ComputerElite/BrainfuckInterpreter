@@ -27,12 +27,12 @@ all content_length 6
 macro http.send_response 2
 ;; Send the response code
 wrt.s "HTTP/1.1 "
-wrt.s $0
-wrt.s " OK\r\n"
+out.n $0
+wrt.s "\r\n"
 wrt.s "Server: brainfuck\r\n"
-string.get_length $content_length $1
+string.get_length_new $content_length $1
 wrt.s "Content-Length: "
-uint16.to_string $content_length $content_length
+uint8.to_string $content_length $content_length
 out.n $content_length
 wrt.s "\r\nConnection: close\r\n"
 wrt.s "Content-Type: text/plain\r\n"
@@ -55,13 +55,16 @@ bash.start_command_in_buffer
 bash.switch_to_console
 wrt.s "Started netcat listener on port 5000\n"
 bash.switch_to_process 0
-all http_header 128 ;; 2048 bytes buffer for body
+all http_header 44
 all http_method 6
 all http_path 32
 all read_pointer 1
 all write_pointer 1
 all space 1
-all body 128
+all body 64
+all status_code 7
+all path_check 32
+set.s $status_code "200 OK"
 set.n $space 32
 set.a $write_pointer $http_method
 set.a $read_pointer $http_header
@@ -90,13 +93,29 @@ consume_until_space
 out.n $http_method
 wrt.s \n
 out.n $http_path
+wrt.s \n
+set.s $path_check /hello
+string.compare $http_path $path_check handle_hello
+set.s $path_check /bye
+string.compare $http_path $path_check handle_bye
+
 jmp handle_default
 
 :handle_default
-set.s $body "This path hasn't been found"
+set.s $body "404 - Not found"
+set.s $status_code 404
+jmp send_body
+
+:handle_hello
+set.s $body "Hello, World!"
+set.s $status_code 200
+jmp send_body
+
+:handle_bye
+set.s $body "Goodbye, World!"
+set.s $status_code 200
 jmp send_body
 
 :send_body
 bash.switch_to_process 0
-set.s $body "Brainfuck is really really fun!!!"
-http.send_response "200" $body
+http.send_response $status_code $body

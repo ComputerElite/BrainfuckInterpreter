@@ -73,6 +73,16 @@ jmp cebf_stdlib_string_get_length__loop
 
 macroend
 
+;; Stores the length of a string in a variable
+;; string.get_length_new <length_store_address> <string_address>
+macro string.get_length_new 2
+set.a $cebf_stdlib_0 $1
+raw *$cebf_stdlib_0 <[-]>[>+>]<<<[[>>[-<<+>>]]<<<<]+[->>[-<<+>>]<<<<]>>[-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>]+>
+;;raw $cebf_compiler_0 #
+cpy $cebf_compiler_0 $0
+
+macroend
+
 ;; Converts a string into an int
 ;; string.to_int <string_address> <int_store_address>
 macro string.to_int 2
