@@ -60,6 +60,14 @@
 ;;wrt.s $0
 ;;cpy $cebf_stdlib_0 $cebf_interpreter_0
 ;;macroend
+;; Adds a string from cebf to the command buffer
+;; bash💩push_command
+;;macro bash.push_command 1
+;;cpy $cebf_interpreter_0 $cebf_stdlib_0
+;;set.n $cebf_interpreter_0 1
+;;out.n $0
+;;cpy $cebf_stdlib_0 $cebf_interpreter_0
+;;macroend
 ;; Starts the bash command in the bash buffer of the cebf interpreter💩 out/in streams will be redirected to started command
 ;; bash💩start_command_in_buffer
 ;;macro bash.start_command_in_buffer 0
@@ -334,9 +342,38 @@
 ;;out.n $0
 ;;bash.switch_to_process 0
 ;;macroend
+;; Sends a file via http
+;; http💩send_file 💩file_path💩
+;;macro http.send_file 1
+;;bash.switch_to_process 0
+;;wrt.s "HTTP/1.1 200 OK"
+;;wrt.s "\r\n"
+;;wrt.s "Server: brainfuck\r\n"
+;;wrt.s "Content-Length: "
+;;bash.switch_to_process 1
+;;bash.set_command "du -b "
+;;bash.set_command $0
+;;bash.set_command "| cut -f1 | tr -d '\n'"
+;;bash.start_command_in_buffer
+;;bash.read_stdout_to_end $content_length
+;;bash.kill_process
+;;bash.switch_to_process 0
+;;out.n $content_length
+;;wrt.s "\r\nConnection: close\r\n"
+;;wrt.s "Content-Type: text/plain\r\n"
+;;wrt.s "\r\n"
+;;;; Send the response body
+;;bash.switch_to_process 1
+;;bash.set_command "cat "
+;;bash.set_command $0
+;;bash.start_command_in_buffer
+;;raw $cebf_interpreter_0 [-]>[-]>[-]+[<<+++++>[-]+.-<----->>,<<+++++>[-].<----->>.+]<<
+;;bash.switch_to_process 0
+;;macroend
 ;; response_code is a directly passed string💩 response body a address
 ;; http💩send_response 💩response_code💩 💩response_body💩
 ;;macro http.send_response 2
+;;bash.switch_to_process 0
 ;;;; Send the response code
 ;;wrt.s "HTTP/1.1 "
 ;;out.n $0
@@ -431,7 +468,7 @@ out.n $http_method
 wrt.s \n
 out.n $http_path
 wrt.s \n
-set.s $path_check /hello
+set.s $path_check /file
 
 set.a $cebf_stdlib_1 $http_path
 set.a $cebf_stdlib_2 $path_check
@@ -453,9 +490,9 @@ jmp cebf_stdlib_string_compare_compare_failed___call_0
 
 jmp.nz *$cebf_stdlib_1 cebf_stdlib_string_compare_pre_loop___call_0
 
-jmp handle_hello
+jmp handle_file
 :cebf_stdlib_string_compare_compare_failed___call_0
-set.s $path_check /bye
+set.s $path_check /hello
 
 set.a $cebf_stdlib_1 $http_path
 set.a $cebf_stdlib_2 $path_check
@@ -477,8 +514,32 @@ jmp cebf_stdlib_string_compare_compare_failed___call_1
 
 jmp.nz *$cebf_stdlib_1 cebf_stdlib_string_compare_pre_loop___call_1
 
-jmp handle_bye
+jmp handle_hello
 :cebf_stdlib_string_compare_compare_failed___call_1
+set.s $path_check /bye
+
+set.a $cebf_stdlib_1 $http_path
+set.a $cebf_stdlib_2 $path_check
+jmp cebf_stdlib_string_compare_loop___call_2
+
+:cebf_stdlib_string_compare_pre_loop___call_2
+
+inc $cebf_stdlib_1
+inc $cebf_stdlib_2
+:cebf_stdlib_string_compare_loop___call_2
+
+
+sub *$cebf_stdlib_1 *$cebf_stdlib_2 $cebf_stdlib_0
+
+jmp.ez $cebf_stdlib_0 cebf_stdlib_string_compare_compare_succeeded___call_2
+
+jmp cebf_stdlib_string_compare_compare_failed___call_2
+:cebf_stdlib_string_compare_compare_succeeded___call_2
+
+jmp.nz *$cebf_stdlib_1 cebf_stdlib_string_compare_pre_loop___call_2
+
+jmp handle_bye
+:cebf_stdlib_string_compare_compare_failed___call_2
 jmp handle_default
 :handle_default
 set.s $body "404 - Not found"
@@ -492,6 +553,85 @@ jmp send_body
 set.s $body "Goodbye, World!"
 set.s $status_code "200 OK"
 jmp send_body
+:handle_file
+set.n $cebf_compiler_0 0
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+wrt.s "HTTP/1.1 200 OK"
+wrt.s "\r\n
+wrt.s "Server: brainfuck\r\n"
+wrt.s "Content-Length: "
+set.n $cebf_compiler_0 1
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s "du -b "
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s ~/rider/BrainfuckInterpreter/response.txt
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s "| cut -f1 | tr -d '\n'"
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+set.n $cebf_interpreter_0 2
+wrt.n
+set.a $content_length $cebf_stdlib_0
+
+set.n $cebf_interpreter_0 3
+in.c $cebf_stdlib_1
+jmp.ez $cebf_stdlib_1 cebf_stdlib_bash_read_stdout_to_end__end___call_0
+set.n $cebf_interpreter_0 0
+:cebf_stdlib_bash_read_stdout_to_end__loop___call_0
+
+in.c *$cebf_stdlib_0
+inc $cebf_stdlib_0
+jmp.nz $cebf_interpreter_1 cebf_stdlib_bash_read_stdout_to_end__exit___call_0
+jmp cebf_stdlib_bash_read_stdout_to_end__loop___call_0
+:cebf_stdlib_bash_read_stdout_to_end__end___call_0
+
+set.n *$cebf_stdlib_0 0
+:cebf_stdlib_bash_read_stdout_to_end__exit___call_0
+set.n $cebf_interpreter_0 3
+wrt.n
+set.n $cebf_compiler_0 0
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+out.n $content_length
+wrt.s "\r\nConnection: close\r\n"
+wrt.s "Content-Type: text/plain\r\n"
+wrt.s "\r\n
+
+set.n $cebf_compiler_0 1
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s "cat "
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s ~/rider/BrainfuckInterpreter/response.txt
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+set.n $cebf_interpreter_0 2
+wrt.n
+raw $cebf_interpreter_0 [-]>[-]>[-]+[<<+++++>[-]+.-<----->>,<<+++++>[-].<----->>.+]<<
+set.n $cebf_compiler_0 0
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+jmp handle_new_connection
 :send_body
 set.n $cebf_compiler_0 0
 set.n $cebf_interpreter_0 5

@@ -14,9 +14,39 @@ out.n $0
 bash.switch_to_process 0
 macroend
 
+;; Sends a file via http
+;; http.send_file <file_path>
+macro http.send_file 1
+bash.switch_to_process 0
+wrt.s "HTTP/1.1 200 OK"
+wrt.s "\r\n"
+wrt.s "Server: brainfuck\r\n"
+wrt.s "Content-Length: "
+bash.switch_to_process 1
+bash.set_command "du -b "
+bash.set_command $0
+bash.set_command "| cut -f1 | tr -d '\n'"
+bash.start_command_in_buffer
+bash.read_stdout_to_end $content_length
+bash.kill_process
+bash.switch_to_process 0
+out.n $content_length
+wrt.s "\r\nConnection: close\r\n"
+wrt.s "Content-Type: text/plain\r\n"
+wrt.s "\r\n"
+;; Send the response body
+bash.switch_to_process 1
+bash.set_command "cat "
+bash.set_command $0
+bash.start_command_in_buffer
+raw $cebf_interpreter_0 [-]>[-]>[-]+[<<+++++>[-]+.-<----->>,<<+++++>[-].<----->>.+]<<
+bash.switch_to_process 0
+macroend
+
 ;; response_code is a directly passed string, response body a address
 ;; http.send_response <response_code> <response_body>
 macro http.send_response 2
+bash.switch_to_process 0
 ;; Send the response code
 wrt.s "HTTP/1.1 "
 out.n $0
@@ -88,6 +118,8 @@ out.n $http_method
 wrt.s \n
 out.n $http_path
 wrt.s \n
+set.s $path_check /file
+string.compare $http_path $path_check handle_file
 set.s $path_check /hello
 string.compare $http_path $path_check handle_hello
 set.s $path_check /bye
@@ -110,6 +142,9 @@ set.s $body "Goodbye, World!"
 set.s $status_code "200 OK"
 jmp send_body
 
+:handle_file
+http.send_file ~/rider/BrainfuckInterpreter/response.txt
+jmp handle_new_connection
+
 :send_body
-bash.switch_to_process 0
 http.send_response $status_code $body

@@ -1,13 +1,1 @@
-HTTP/1.1 200 OK
-Server: brainfuck
-Content-Length: 13
-Connection: close
-Content-Type: text/plain
-
-Hello, World!HTTP/1.1 200 OK
-Server: brainfuck
-Content-Length: 13
-Connection: close
-Content-Type: text/plain
-
-Hello, World!
+This is a test file

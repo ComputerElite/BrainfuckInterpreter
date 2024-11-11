@@ -559,7 +559,7 @@ namespace CEBrainfuckCreator
 					inQuotationMark = true;
 					nS = s.Substring(1);
 				}
-				if (s.EndsWith("\"") && !s.EndsWith("\\\""))
+				if (s.EndsWith("\"") && !s.EndsWith("\\\"") && s.Length > 1)
 				{
 					inQuotationMark = false;
 					nS = s.Substring(0, s.Length - 1);

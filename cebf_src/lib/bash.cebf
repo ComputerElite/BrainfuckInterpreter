@@ -13,6 +13,15 @@ wrt.s $0
 cpy $cebf_stdlib_0 $cebf_interpreter_0
 macroend
 
+;; Adds a string from cebf to the command buffer
+;; bash.push_command
+macro bash.push_command 1
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+out.n $0
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+macroend
+
 ;; Starts the bash command in the bash buffer of the cebf interpreter. out/in streams will be redirected to started command
 ;; bash.start_command_in_buffer
 macro bash.start_command_in_buffer 0 
