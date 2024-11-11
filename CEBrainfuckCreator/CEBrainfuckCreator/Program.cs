@@ -238,8 +238,8 @@ namespace CEBrainfuckCreator
 			
 			for (currentLine = 0; currentLine < lines.Count; currentLine++)
 			{
-				if (lines[currentLine].content == "") lines[currentLine].content = ";; Hi; you seem to have entered an empty line; The compiler does not like this cause it cannot count reliably; Please not that poop emojis are better in commands than dots 💩";
-				bfReal += "\n;;" + SanitizeComment(lines[currentLine].content) + "\n";
+				if (lines[currentLine].content != "")
+					bfReal += "\n;;" + SanitizeComment(lines[currentLine].content) + "\n";
 				int commentIndex = lines[currentLine].IndexOf(";;");
 				if(commentIndex != -1) lines[currentLine].content = lines[currentLine].Substring(0, commentIndex);
 				List<string> cmds = lines[currentLine].Split(' ').ToList();

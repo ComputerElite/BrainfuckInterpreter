@@ -1,7 +1,7 @@
 #seperatestatemachine
 #produceprecompilecebf
 #cellsize 65535
-;;💩minify
+#minify
 ;;💩commentcode
 ;; Standard library for cebf
 ;; by ComputerElite 2024
@@ -163,8 +163,6 @@
 ;;inc $cebf_stdlib_1
 ;;inc $cebf_stdlib_2
 ;;:cebf_stdlib_string_compare_loop
-;;out.r *$cebf_stdlib_1
-;;out.r *$cebf_stdlib_2
 ;;;; if both characters are equal check what they are
 ;;jmp.eq *$cebf_stdlib_1 *$cebf_stdlib_2 cebf_stdlib_string_compare_compare_succeeded
 ;;;; now check if any of the strings are null
@@ -329,11 +327,6 @@
 ;;fre cebf_stdlib_uint16_to_string__str_pointer
 ;;fre cebf_stdlib_uint16_to_string__forty_eight
 ;;macroend
-;;all a 1
-;;all str 3
-;;set💩n $a 5
-;;int8💩to_string $a $str
-;;out💩n $str
 ;; Outputs a string at the specified address to the console and then switches back to process outputs
 ;; output_string_in_console 💩string_address💩
 ;;macro output_string_in_console 1
@@ -341,7 +334,6 @@
 ;;out.n $0
 ;;bash.switch_to_process 0
 ;;macroend
-all content_length 6
 ;; response_code is a directly passed string💩 response body a address
 ;; http💩send_response 💩response_code💩 💩response_body💩
 ;;macro http.send_response 2
@@ -362,6 +354,7 @@ all content_length 6
 ;;all empty_line 2
 ;;;;
 ;;macroend
+all content_length 6
 ;; Connect with a netcat server
 :handle_new_connection
 ;; Here we recreate the netcat process to accept new requests
@@ -449,8 +442,6 @@ jmp cebf_stdlib_string_compare_loop___call_0
 inc $cebf_stdlib_1
 inc $cebf_stdlib_2
 :cebf_stdlib_string_compare_loop___call_0
-out.r *$cebf_stdlib_1
-out.r *$cebf_stdlib_2
 
 
 sub *$cebf_stdlib_1 *$cebf_stdlib_2 $cebf_stdlib_0
@@ -475,8 +466,6 @@ jmp cebf_stdlib_string_compare_loop___call_1
 inc $cebf_stdlib_1
 inc $cebf_stdlib_2
 :cebf_stdlib_string_compare_loop___call_1
-out.r *$cebf_stdlib_1
-out.r *$cebf_stdlib_2
 
 
 sub *$cebf_stdlib_1 *$cebf_stdlib_2 $cebf_stdlib_0
@@ -497,11 +486,11 @@ set.s $status_code 404
 jmp send_body
 :handle_hello
 set.s $body "Hello, World!"
-set.s $status_code 200
+set.s $status_code "200 OK"
 jmp send_body
 :handle_bye
 set.s $body "Goodbye, World!"
-set.s $status_code 200
+set.s $status_code "200 OK"
 jmp send_body
 :send_body
 set.n $cebf_compiler_0 0

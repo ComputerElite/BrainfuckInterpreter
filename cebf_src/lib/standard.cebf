@@ -39,8 +39,6 @@ inc $cebf_stdlib_1
 inc $cebf_stdlib_2
 
 :cebf_stdlib_string_compare_loop
-out.r *$cebf_stdlib_1
-out.r *$cebf_stdlib_2
 ;; if both characters are equal check what they are
 jmp.eq *$cebf_stdlib_1 *$cebf_stdlib_2 cebf_stdlib_string_compare_compare_succeeded
 ;; now check if any of the strings are null

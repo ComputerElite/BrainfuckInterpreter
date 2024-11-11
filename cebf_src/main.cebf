@@ -1,15 +1,9 @@
 #seperatestatemachine
 #produceprecompilecebf
 #cellsize 65535
-;;#minify
+#minify
 ;;#commentcode
 #include lib/standard.cebf
-;;all a 1
-;;all str 3
-;;set.n $a 5
-;;int8.to_string $a $str
-;;out.n $str
-
 
 ;; Outputs a string at the specified address to the console and then switches back to process outputs
 ;; output_string_in_console <string_address>
@@ -19,8 +13,6 @@ bash.switch_to_console
 out.n $0
 bash.switch_to_process 0
 macroend
-all content_length 6
-
 
 ;; response_code is a directly passed string, response body a address
 ;; http.send_response <response_code> <response_body>
@@ -44,6 +36,8 @@ all empty_line 2
 
 ;;
 macroend
+
+all content_length 6
 ;; Connect with a netcat server
 :handle_new_connection
 ;; Here we recreate the netcat process to accept new requests
@@ -108,12 +102,12 @@ jmp send_body
 
 :handle_hello
 set.s $body "Hello, World!"
-set.s $status_code 200
+set.s $status_code "200 OK"
 jmp send_body
 
 :handle_bye
 set.s $body "Goodbye, World!"
-set.s $status_code 200
+set.s $status_code "200 OK"
 jmp send_body
 
 :send_body
