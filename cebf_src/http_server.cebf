@@ -1,0 +1,151 @@
+#seperatestatemachine
+#produceprecompilecebf
+#cellsize 65535
+#minify
+;;#commentcode
+#include lib/standard.cebf
+
+;; Outputs a string at the specified address to the console and then switches back to process outputs
+;; output_string_in_console <string_address>
+macro output_string_in_console 1
+
+bash.switch_to_console
+out.n $0
+bash.switch_to_process 0
+macroend
+
+;; Sends a file via http
+;; http.send_file <file_path>
+macro http.send_file 1
+bash.switch_to_process 0
+wrt.s "HTTP/1.1 200 OK"
+wrt.s "\r\n"
+wrt.s "Server: brainfuck\r\n"
+wrt.s "Content-Length: "
+bash.switch_to_process 1
+bash.set_command "du -b "
+bash.set_command $0
+bash.set_command "| cut -f1 | tr -d '\n'"
+bash.start_command_in_buffer
+bash.read_stdout_to_end $content_length
+bash.kill_process
+bash.switch_to_process 0
+out.n $content_length
+wrt.s "\r\nConnection: close\r\n"
+wrt.s "Content-Type: text/plain\r\n"
+wrt.s "\r\n"
+;; Send the response body
+bash.switch_to_process 1
+bash.set_command "cat "
+bash.set_command $0
+bash.start_command_in_buffer
+raw $cebf_interpreter_0 [-]>[-]>[-]+[<<+++++>[-]+.-<----->>,<<+++++>[-].<----->>.+]<<
+bash.switch_to_process 0
+macroend
+
+;; response_code is a directly passed string, response body a address
+;; http.send_response <response_code> <response_body>
+macro http.send_response 2
+bash.switch_to_process 0
+;; Send the response code
+wrt.s "HTTP/1.1 "
+out.n $0
+wrt.s "\r\n"
+wrt.s "Server: brainfuck\r\n"
+string.get_length_new $content_length $1
+wrt.s "Content-Length: "
+uint8.to_string $content_length $content_length
+out.n $content_length
+wrt.s "\r\nConnection: close\r\n"
+wrt.s "Content-Type: text/plain\r\n"
+wrt.s "\r\n"
+;; Send the response body
+out.n $body
+
+all empty_line 2
+
+;;
+macroend
+
+all content_length 6
+;; Connect with a netcat server
+:handle_new_connection
+;; Here we recreate the netcat process to accept new requests
+
+bash.switch_to_process 0
+bash.kill_process
+bash.set_command "nc -lvnp 5001"
+;;bash.set_command "cat >> response.txt"
+bash.start_command_in_buffer
+bash.switch_to_console
+wrt.s "Started netcat listener on port 5001\n"
+bash.switch_to_process 0
+all http_header 44
+all http_method 6
+all http_path 32
+all read_pointer 1
+all write_pointer 1
+all space 1
+all body 64
+all status_code 7
+all path_check 32
+set.s $status_code "200 OK"
+set.n $space 32
+set.a $write_pointer $http_method
+set.a $read_pointer $http_header
+in.line $http_header
+
+bash.switch_to_console
+;; Read first line and extract method and path
+
+;; Consume the next character from the read pointer and copies it to the write pointer until space is hit
+;; consume_until_space
+macro consume_until_space 0
+:consume_until_space__loop
+jmp.eq *$read_pointer $space consume_until_space__end
+cpy *$read_pointer *$write_pointer
+inc $read_pointer
+inc $write_pointer
+jmp consume_until_space__loop
+:consume_until_space__end
+macroend
+
+
+consume_until_space
+inc $read_pointer
+set.a $write_pointer $http_path
+consume_until_space
+out.n $http_method
+wrt.s \n
+out.n $http_path
+wrt.s \n
+set.s $path_check /file
+string.compare $http_path $path_check handle_file
+set.s $path_check /hello
+string.compare $http_path $path_check handle_hello
+set.s $path_check /bye
+string.compare $http_path $path_check handle_bye
+
+jmp handle_default
+
+:handle_default
+set.s $body "404 - Not found"
+set.s $status_code 404
+jmp send_body
+
+:handle_hello
+set.s $body "Hello, World!"
+set.s $status_code "200 OK"
+jmp send_body
+
+:handle_bye
+set.s $body "Goodbye, World!"
+set.s $status_code "200 OK"
+jmp send_body
+
+:handle_file
+http.send_file ~/rider/BrainfuckInterpreter/response.txt
+jmp handle_new_connection
+
+:send_body
+http.send_response $status_code $body

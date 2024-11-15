@@ -152,6 +152,11 @@ macro in.line 1
 raw $0 [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>----------]<[-<<]>
 macroend
 
+;; reads until null into the given address, null terminated
+;; in.null <address>
+macro in.null 1
+raw $0 [-]+[,>[-]>[-]<<[->+>+<<]>[-<+>]+>]<[-<<]>
+macroend
 
 ;; Converts n int to a string
 ;; uint8.to_string <int_address> <string_address>

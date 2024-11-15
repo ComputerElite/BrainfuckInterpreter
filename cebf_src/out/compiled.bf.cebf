@@ -391,6 +391,27 @@
 ;;all empty_line 2
 ;;;;
 ;;macroend
+;; start connection to server on slot 2
+set.n $cebf_compiler_0 2
+set.n $cebf_interpreter_0 5
+out.r $cebf_compiler_0
+set.n $cebf_interpreter_0 0
+
+cpy $cebf_interpreter_0 $cebf_stdlib_0
+set.n $cebf_interpreter_0 1
+wrt.s "nc localhost 5000"
+cpy $cebf_stdlib_0 $cebf_interpreter_0
+set.n $cebf_interpreter_0 2
+wrt.n
+;; send player name
+all name 7
+set.s $name test
+out.n $name
+wrt.s \0
+set.n $cebf_interpreter_0 4
+wrt.s "Connected to server as "
+out.n $name
+wrt.s "\n"
 all content_length 6
 ;; Connect with a netcat server
 :handle_new_connection
@@ -404,13 +425,13 @@ wrt.n
 
 cpy $cebf_interpreter_0 $cebf_stdlib_0
 set.n $cebf_interpreter_0 1
-wrt.s "nc -lvnp 5000"
+wrt.s "nc -lvnp 5001"
 cpy $cebf_stdlib_0 $cebf_interpreter_0
 ;;bash💩set_command "cat 💩💩 response💩txt"
 set.n $cebf_interpreter_0 2
 wrt.n
 set.n $cebf_interpreter_0 4
-wrt.s "Started netcat listener on port 5000\n"
+wrt.s "Started netcat listener on port 5001\n"
 set.n $cebf_compiler_0 0
 set.n $cebf_interpreter_0 5
 out.r $cebf_compiler_0
